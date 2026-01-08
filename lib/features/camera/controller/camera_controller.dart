@@ -2,7 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pixora/features/camera/models/camera_mode.dart';
-import 'package:pixora/features/camera/service/flash_service.dart';
+import 'package:pixora/features/camera/service/flash_service.dart'
+    show FlashService;
 import '../../../core/constants/app_filters.dart';
 import '../models/filter_model.dart';
 
@@ -48,18 +49,17 @@ class CameraControllerX extends ChangeNotifier {
   // -------------------- Flash --------------------
   FlashModeX flashMode = FlashModeX.off;
 
-Future<void> toggleFlashMode() async {
-  flashMode = flashMode == FlashModeX.off
-      ? FlashModeX.on
-      : flashMode == FlashModeX.on
-          ? FlashModeX.auto
-          : FlashModeX.off;
+  Future<void> toggleFlashMode() async {
+    flashMode = flashMode == FlashModeX.off
+        ? FlashModeX.on
+        : flashMode == FlashModeX.on
+        ? FlashModeX.auto
+        : FlashModeX.off;
 
-  await FlashService.setFlashMode(flashMode);
-  notifyListeners();
-}
+    await FlashService.setFlashMode(flashMode);
 
-
+    notifyListeners();
+  }
 
   IconData get flashIcon {
     switch (flashMode) {

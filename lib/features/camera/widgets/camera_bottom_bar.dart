@@ -1,9 +1,8 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:pixora/core/theme/app_colors.dart';
+import 'package:pixora/features/camera/service/flash_service.dart';
 import 'package:provider/provider.dart';
-
 import '../controller/camera_controller.dart';
 import 'camera_overlays.dart';
 
@@ -12,14 +11,11 @@ class CameraBottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-      bottom: MediaQuery.of(context).padding.bottom + 60,
-      left: 0,
-      right: 0,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: const _BottomBarContent(),
-      ),
+    final bottomInset = MediaQuery.of(context).padding.bottom;
+
+    return Padding(
+      padding: EdgeInsets.only(left: 24, right: 24, bottom: bottomInset),
+      child: const _BottomBarContent(),
     );
   }
 }
@@ -54,12 +50,18 @@ class _FlipCameraButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CameraOverlayWidget.glassIcon(
-      icon: Icons.autorenew_rounded,
-      size: 20,
+    return GestureDetector(
+      onTap: () {
+        CameraPlatform.switchCamera();
+      },
+      child: CameraOverlayWidget.glassIcon(
+        icon: Icons.autorenew_rounded,
+        size: 20,
+      ),
     );
   }
 }
+
 
 class _CaptureSection extends StatelessWidget {
   const _CaptureSection();
@@ -132,7 +134,6 @@ class _CaptureButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: _handleTap,
-      onLongPressStart: (_) {},
       onLongPressEnd: (_) {
         if (controller.isVideoLike) controller.stopRecording();
       },
@@ -151,8 +152,8 @@ class _CaptureButton extends StatelessWidget {
     if (controller.isPhotoMode) {
       log("capturePhoto");
     } else if (!controller.isRecording) {
-      log("startRecording");
       controller.startRecording();
+      log("startRecording");
     } else {
       controller.stopRecording();
       log("stopRecording");

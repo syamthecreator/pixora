@@ -11,12 +11,7 @@ class CameraFilterBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-      bottom: 200,
-      left: 0,
-      right: 0,
-      child: const _FilterCarousel(),
-    );
+    return const _FilterCarousel();
   }
 }
 
@@ -28,7 +23,7 @@ class _FilterCarousel extends StatelessWidget {
     final controller = context.watch<CameraControllerX>();
 
     return SizedBox(
-      height: 110,
+      height: 150,
       child: PageView.builder(
         controller: controller.filterPageController,
         clipBehavior: Clip.none,
@@ -63,25 +58,19 @@ class _FilterItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: _handleTap,
+      onTap: _onTap,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _FilterImage(
-            imagePath: filter.image,
-            isActive: isActive,
-          ),
+          _FilterImage(imagePath: filter.image, isActive: isActive),
           const SizedBox(height: 8),
-          _FilterLabel(
-            name: filter.name,
-            isActive: isActive,
-          ),
+          _FilterLabel(name: filter.name, isActive: isActive),
         ],
       ),
     );
   }
 
-  void _handleTap() {
+  void _onTap() {
     controller.filterPageController.animateToPage(
       index,
       duration: const Duration(milliseconds: 300),
@@ -94,10 +83,7 @@ class _FilterImage extends StatelessWidget {
   final String imagePath;
   final bool isActive;
 
-  const _FilterImage({
-    required this.imagePath,
-    required this.isActive,
-  });
+  const _FilterImage({required this.imagePath, required this.isActive});
 
   @override
   Widget build(BuildContext context) {
@@ -118,12 +104,7 @@ class _FilterImage extends StatelessWidget {
               width: 2,
             ),
           ),
-          child: ClipOval(
-            child: Image.asset(
-              imagePath,
-              fit: BoxFit.cover,
-            ),
-          ),
+          child: ClipOval(child: Image.asset(imagePath, fit: BoxFit.cover)),
         ),
       ),
     );
@@ -134,16 +115,13 @@ class _FilterLabel extends StatelessWidget {
   final String name;
   final bool isActive;
 
-  const _FilterLabel({
-    required this.name,
-    required this.isActive,
-  });
+  const _FilterLabel({required this.name, required this.isActive});
 
   @override
   Widget build(BuildContext context) {
     return AnimatedOpacity(
-      duration: const Duration(milliseconds: 200),
       opacity: isActive ? 1 : 0,
+      duration: const Duration(milliseconds: 200),
       child: Text(
         name.toUpperCase(),
         style: const TextStyle(
@@ -156,4 +134,3 @@ class _FilterLabel extends StatelessWidget {
     );
   }
 }
-

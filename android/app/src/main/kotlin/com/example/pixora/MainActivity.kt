@@ -10,6 +10,8 @@ class MainActivity : FlutterActivity() {
 
     // ---------- Channels ----------
     private val FLASH_CHANNEL = "pixora/flash"
+    private val CAMERA_CHANNEL = "pixora/camera"
+
 
     // ---------- Controllers ----------
     private lateinit var flashController: FlashController
@@ -33,6 +35,22 @@ class MainActivity : FlutterActivity() {
                 else -> result.notImplemented()
             }
         }
+
+
+        MethodChannel(
+    flutterEngine.dartExecutor.binaryMessenger,
+    CAMERA_CHANNEL
+).setMethodCallHandler { call, result ->
+    when (call.method) {
+        "switchCamera" -> {
+            CameraViewFactory.cameraController
+                .switchCamera(this)
+            result.success(null)
+        }
+        else -> result.notImplemented()
+    }
+}
+
 
         // ---------------- Camera Preview ----------------
         flutterEngine

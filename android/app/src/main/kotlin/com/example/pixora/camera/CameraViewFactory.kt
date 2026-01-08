@@ -11,19 +11,21 @@ class CameraViewFactory(
     private val lifecycleOwner: LifecycleOwner
 ) : PlatformViewFactory(StandardMessageCodec.INSTANCE) {
 
+    companion object {
+        lateinit var cameraController: CameraController
+    }
+
     override fun create(context: Context, viewId: Int, args: Any?): PlatformView {
         return object : PlatformView {
 
             private val previewView = PreviewView(context).apply {
-                // 🔥 THIS IS THE KEY LINE
-                scaleType = PreviewView.ScaleType.FIT_CENTER
+                scaleType = PreviewView.ScaleType.FILL_CENTER
                 implementationMode = PreviewView.ImplementationMode.COMPATIBLE
             }
 
-            private val controller = CameraController(context, previewView)
-
             init {
-                controller.startCamera(lifecycleOwner)
+                cameraController = CameraController(context, previewView)
+                cameraController.startCamera(lifecycleOwner)
             }
 
             override fun getView() = previewView

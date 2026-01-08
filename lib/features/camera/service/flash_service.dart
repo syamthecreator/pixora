@@ -11,3 +11,13 @@ class FlashService {
     });
   }
 }
+
+
+
+class CameraPlatform {
+  static const _channel = MethodChannel('pixora/camera');
+
+  static Future<void> switchCamera() async {
+    await _channel.invokeMethod('switchCamera');
+  }
+}

@@ -65,21 +65,6 @@ class SettingsController extends ChangeNotifier {
   /// Returns selected timer index
   int getTimerIndex() => _availableTimers.indexOf(selectedTimer);
 
-  /// Converts string ratio to enum
-  CameraRatio get selectedCameraRatio {
-    switch (selectedRatio) {
-      case "1:1":
-        return CameraRatio.oneOne;
-      case "4:3":
-        return CameraRatio.fourThree;
-      case "16:9":
-        return CameraRatio.sixteenNine;
-      case "Full":
-        return CameraRatio.full;
-      default:
-        return CameraRatio.fourThree;
-    }
-  }
 
   // -------------------- Quick Settings UI --------------------
 

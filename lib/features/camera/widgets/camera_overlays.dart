@@ -1,6 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 
+enum CameraOverlayType { glassContainer, glassIcon }
+
 class CameraOverlayWidget extends StatelessWidget {
   final Widget? child;
   final IconData? icon;
@@ -11,10 +13,6 @@ class CameraOverlayWidget extends StatelessWidget {
   final double blurSigma;
   final double borderRadius;
   final EdgeInsetsGeometry padding;
-  final int? divisions;
-  final Color lineColor;
-  final double lineWidth;
-  final double opacity;
   final CameraOverlayType type;
 
   const CameraOverlayWidget._({
@@ -28,10 +26,6 @@ class CameraOverlayWidget extends StatelessWidget {
     this.blurSigma = 14.0,
     this.borderRadius = 20.0,
     this.padding = EdgeInsets.zero,
-    this.divisions,
-    this.lineColor = Colors.white,
-    this.lineWidth = 0.6,
-    this.opacity = 0.08,
     required this.type,
   });
 
@@ -77,24 +71,6 @@ class CameraOverlayWidget extends StatelessWidget {
     );
   }
 
-  factory CameraOverlayWidget.gridOverlay({
-    Key? key,
-    int divisions = 3,
-    Color lineColor = Colors.white,
-    double lineWidth = 0.6,
-    double opacity = 0.08,
-  }) {
-    assert(divisions > 1, 'Divisions must be greater than 1');
-    return CameraOverlayWidget._(
-      key: key,
-      divisions: divisions,
-      lineColor: lineColor,
-      lineWidth: lineWidth,
-      opacity: opacity,
-      type: CameraOverlayType.gridOverlay,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     switch (type) {
@@ -102,8 +78,6 @@ class CameraOverlayWidget extends StatelessWidget {
         return _buildGlassContainer();
       case CameraOverlayType.glassIcon:
         return _buildGlassIcon();
-      case CameraOverlayType.gridOverlay:
-        return _buildGridOverlay();
     }
   }
 
@@ -137,61 +111,4 @@ class CameraOverlayWidget extends StatelessWidget {
       ),
     );
   }
-
-  Widget _buildGridOverlay() {
-    return CustomPaint(
-      size: Size.infinite,
-      painter: _GridPainter(
-        divisions: divisions!,
-        lineColor: lineColor,
-        lineWidth: lineWidth,
-        opacity: opacity,
-      ),
-    );
-  }
-}
-
-enum CameraOverlayType { glassContainer, glassIcon, gridOverlay }
-
-class _GridPainter extends CustomPainter {
-  final int divisions;
-  final Color lineColor;
-  final double lineWidth;
-  final double opacity;
-
-  const _GridPainter({
-    required this.divisions,
-    required this.lineColor,
-    required this.lineWidth,
-    required this.opacity,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = lineColor.withValues(alpha: opacity)
-      ..strokeWidth = lineWidth
-      ..style = PaintingStyle.stroke;
-
-    final widthStep = size.width / divisions;
-    final heightStep = size.height / divisions;
-
-    for (int i = 1; i < divisions; i++) {
-      final x = widthStep * i;
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
-      final y = heightStep * i;
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(_GridPainter oldDelegate) {
-    return divisions != oldDelegate.divisions ||
-        lineColor != oldDelegate.lineColor ||
-        lineWidth != oldDelegate.lineWidth ||
-        opacity != oldDelegate.opacity;
-  }
-
-  @override
-  bool shouldRebuildSemantics(_GridPainter oldDelegate) => false;
 }
