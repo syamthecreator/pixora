@@ -19,3 +19,13 @@ Future<bool> ensureCameraPermission(BuildContext context) async {
   }
   return false;
 }
+
+
+
+Future<bool> ensureMicPermission() async {
+  final status = await Permission.microphone.status;
+  if (status.isGranted) return true;
+
+  final result = await Permission.microphone.request();
+  return result.isGranted;
+}

@@ -47,30 +47,52 @@ class CameraControllerX extends ChangeNotifier {
   }
 
   // -------------------- Flash --------------------
-  FlashModeX flashMode = FlashModeX.off;
+ FlashModeX flashMode = FlashModeX.off;
+bool isFrontCamera = false;
 
-  Future<void> toggleFlashMode() async {
-    flashMode = flashMode == FlashModeX.off
-        ? FlashModeX.on
-        : flashMode == FlashModeX.on
-        ? FlashModeX.auto
-        : FlashModeX.off;
-
-    await FlashService.setFlashMode(flashMode);
-
+  void onCameraSwitched() {
+    isFrontCamera = !isFrontCamera;
     notifyListeners();
   }
 
-  IconData get flashIcon {
-    switch (flashMode) {
-      case FlashModeX.off:
-        return Icons.flash_off;
-      case FlashModeX.on:
-        return Icons.flash_on;
-      case FlashModeX.auto:
-        return Icons.flash_auto;
-    }
+Future<void> toggleFlashMode() async {
+  if (isFrontCamera) return;
+
+  // Cycle flash mode
+  if (flashMode == FlashModeX.off) {
+    flashMode = FlashModeX.on;
+  } else if (flashMode == FlashModeX.on) {
+    flashMode = FlashModeX.auto;
+  } else {
+    flashMode = FlashModeX.off;
   }
+
+  notifyListeners(); // ✅ update UI immediately
+
+  // Apply TORCH only for BACK camera + FLASH ON
+  try {
+    if (flashMode == FlashModeX.on) {
+      await FlashService.setFlashMode(FlashModeX.on); // 🔦 torch ON
+    } else {
+      await FlashService.setFlashMode(FlashModeX.off); // 🔦 torch OFF
+    }
+  } catch (e) {
+    // 🔒 VERY IMPORTANT: prevents MissingPluginException crash
+    debugPrint('Flash channel not ready yet: $e');
+  }
+}
+
+IconData get flashIcon {
+  switch (flashMode) {
+    case FlashModeX.on:
+      return Icons.flash_on;
+    case FlashModeX.auto:
+      return Icons.flash_auto;
+    default:
+      return Icons.flash_off;
+  }
+}
+
 
   // -------------------- Mode Helpers --------------------
   bool get isPhotoMode => selectedMode == CameraModes.photo.index;

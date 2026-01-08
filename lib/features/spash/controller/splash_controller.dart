@@ -53,7 +53,7 @@ Future<void> navigate(BuildContext context) async {
   } else {
     final allowed = await ensureCameraPermission(context);
     if (!allowed) return;
-
+if(!context.mounted)return;
     Navigator.pushReplacementNamed(context, AppRoutes.cameraScreen);
   }
 }

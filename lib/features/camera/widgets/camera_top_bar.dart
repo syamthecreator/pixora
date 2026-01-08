@@ -23,10 +23,13 @@ class CameraTopBar extends StatelessWidget {
             _buildModeSelector(context),
 
             /// FLASH (OFF → ON → AUTO)
-            GestureDetector(
-              onTap: controller.toggleFlashMode,
-              child: CameraOverlayWidget.glassIcon(icon: controller.flashIcon),
-            ),
+            if (!controller.isFrontCamera)
+              GestureDetector(
+                onTap: controller.toggleFlashMode,
+                child: CameraOverlayWidget.glassIcon(
+                  icon: controller.flashIcon,
+                ),
+              ),
 
             /// SETTINGS
             GestureDetector(

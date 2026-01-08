@@ -19,14 +19,12 @@ class WelcomeAnimationController {
       duration: const Duration(milliseconds: 1200),
     )..forward();
 
-    fade = CurvedAnimation(
-      parent: mainController,
-      curve: Curves.easeOut,
-    );
+    fade = CurvedAnimation(parent: mainController, curve: Curves.easeOut);
 
-    scale = Tween(begin: 1.06, end: 1.0).animate(
-      CurvedAnimation(parent: mainController, curve: Curves.easeOut),
-    );
+    scale = Tween(
+      begin: 1.06,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: mainController, curve: Curves.easeOut));
 
     arrowController = AnimationController(
       vsync: vsync,
@@ -38,21 +36,18 @@ class WelcomeAnimationController {
     );
   }
 
-Future<void> continueFlow(BuildContext context) async {
-  HapticFeedback.lightImpact();
-  await context.read<WelcomeController>().markCompleted();
+  Future<void> continueFlow(BuildContext context) async {
+    HapticFeedback.lightImpact();
+    await context.read<WelcomeController>().markCompleted();
 
-  if (!context.mounted) return;
+    if (!context.mounted) return;
 
-  final allowed = await ensureCameraPermission(context);
-  if (!allowed) return;
+    final allowed = await ensureCameraPermission(context);
+    if (!allowed) return;
+    if (!context.mounted) return;
 
-  Navigator.pushReplacementNamed(
-    context,
-    AppRoutes.cameraScreen,
-  );
-}
-
+    Navigator.pushReplacementNamed(context, AppRoutes.cameraScreen);
+  }
 
   void dispose() {
     mainController.dispose();

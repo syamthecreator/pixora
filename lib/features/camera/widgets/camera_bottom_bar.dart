@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:pixora/core/theme/app_colors.dart';
+import 'package:pixora/core/utils/camera_permission.dart';
 import 'package:pixora/features/camera/service/flash_service.dart';
 import 'package:provider/provider.dart';
 import '../controller/camera_controller.dart';
@@ -50,9 +51,12 @@ class _FlipCameraButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final controller = context.watch<CameraControllerX>();
+
     return GestureDetector(
       onTap: () {
         CameraPlatform.switchCamera();
+        controller.onCameraSwitched();
       },
       child: CameraOverlayWidget.glassIcon(
         icon: Icons.autorenew_rounded,
@@ -61,7 +65,6 @@ class _FlipCameraButton extends StatelessWidget {
     );
   }
 }
-
 
 class _CaptureSection extends StatelessWidget {
   const _CaptureSection();
@@ -130,13 +133,13 @@ class _CaptureButton extends StatelessWidget {
 
   const _CaptureButton({required this.controller});
 
+  static Future<String?>? _videoSaveFuture;
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: _handleTap,
-      onLongPressEnd: (_) {
-        if (controller.isVideoLike) controller.stopRecording();
-      },
+      onTap: () => _handleTap(),
+      onLongPressEnd: (_) => _handleStop(),
       child: const SizedBox(
         width: 90,
         height: 90,
@@ -148,16 +151,50 @@ class _CaptureButton extends StatelessWidget {
     );
   }
 
-  void _handleTap() {
+  // ---------------- TAP ----------------
+  Future<void> _handleTap() async {
     if (controller.isPhotoMode) {
-      log("capturePhoto");
-    } else if (!controller.isRecording) {
-      controller.startRecording();
-      log("startRecording");
-    } else {
-      controller.stopRecording();
-      log("stopRecording");
+      final uri = await CameraPlatform.takePhoto(controller.flashMode.name);
+      if (uri != null) {
+        log("Photo saved: $uri");
+      }
+      return;
     }
+
+    // ---------- START VIDEO ----------
+    if (!controller.isRecording) {
+      final micAllowed = await ensureMicPermission();
+      if (!micAllowed) {
+        log("Microphone permission denied");
+        return;
+      }
+
+      controller.startRecording();
+
+      // 🔑 DO NOT await
+      _videoSaveFuture = CameraPlatform.startRecording();
+      return;
+    }
+
+    // ---------- STOP VIDEO ----------
+    await _handleStop();
+  }
+
+  // ---------------- STOP (tap OR long-press) ----------------
+  Future<void> _handleStop() async {
+    if (!controller.isRecording) return;
+
+    controller.stopRecording();
+    await CameraPlatform.stopRecording();
+
+    // 🔑 WAIT FOR FINALIZE
+    final uri = await _videoSaveFuture;
+
+    if (uri != null) {
+      log("Video saved: $uri");
+    }
+
+    _videoSaveFuture = null;
   }
 }
 

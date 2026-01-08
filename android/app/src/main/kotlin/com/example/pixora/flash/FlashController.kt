@@ -14,12 +14,14 @@ class FlashController(context: Context) {
         characteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE) == true
     }
 
-    fun setFlashMode(mode: String?) {
-        val id = cameraId ?: return
+   fun setFlashMode(mode: String?) {
+    val id = cameraId ?: return
 
-        when (mode) {
-            "on" -> cameraManager.setTorchMode(id, true)
-            "off", "auto" -> cameraManager.setTorchMode(id, false)
-        }
+    when (mode) {
+        "on" -> cameraManager.setTorchMode(id, true)
+        else -> cameraManager.setTorchMode(id, false)
     }
+}
+
+
 }
