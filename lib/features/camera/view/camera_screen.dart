@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pixora/core/theme/app_colors.dart';
 import 'package:pixora/core/utils/permission_handler.dart';
+import 'package:pixora/features/camera/controller/camera_controller.dart';
 import 'package:pixora/features/camera/widgets/camera_bottom_bar.dart';
 import 'package:pixora/features/camera/widgets/camera_filter_bar.dart';
 import 'package:pixora/features/camera/widgets/camera_preview.dart';
@@ -18,11 +19,17 @@ class CameraScreen extends StatefulWidget {
 
 class _CameraScreenState extends State<CameraScreen>
     with WidgetsBindingObserver {
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _checkPermission();
+
+    // ✅ MARK CAMERA READY AFTER FIRST FRAME
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CameraControllerX>().isCameraReady = true;
+    });
   }
 
   @override

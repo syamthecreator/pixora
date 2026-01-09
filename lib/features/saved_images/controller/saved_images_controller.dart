@@ -4,8 +4,7 @@ import 'package:pixora/core/platform/media_service.dart';
 
 class SavedImagesController extends ChangeNotifier {
   /// 🔁 CHANGE THIS IF NEEDED
-  final Directory imageDir =
-      Directory('/storage/emulated/0/Pictures/Pixora');
+  final Directory imageDir = Directory('/storage/emulated/0/Pictures/Pixora');
 
   final List<File> images = [];
 
@@ -22,16 +21,11 @@ class SavedImagesController extends ChangeNotifier {
         .listSync()
         .whereType<File>()
         .where(
-          (file) =>
-              file.path.endsWith('.jpg') ||
-              file.path.endsWith('.png'),
+          (file) => file.path.endsWith('.jpg') || file.path.endsWith('.png'),
         )
         .toList();
 
-    files.sort(
-      (a, b) =>
-          b.lastModifiedSync().compareTo(a.lastModifiedSync()),
-    );
+    files.sort((a, b) => b.lastModifiedSync().compareTo(a.lastModifiedSync()));
 
     images
       ..clear()
@@ -48,8 +42,7 @@ class SavedImagesController extends ChangeNotifier {
     isDeleting = true;
     notifyListeners();
 
-    final bool deleted =
-        await MediaDeleteService.deleteImage(image.path);
+    final bool deleted = await MediaDeleteService.deleteImage(image.path);
 
     if (deleted) {
       images.remove(image);

@@ -6,9 +6,7 @@ class FlashService {
 
   static Future<void> setFlashMode(FlashModeX mode) async {
     await _channel.invokeMethod('setFlashMode', {
-      'mode': mode.name, // off | on | auto
+      'mode': mode.name, // on | auto | off
     });
   }
 }
-
-

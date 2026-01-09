@@ -2,15 +2,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pixora/features/camera/models/camera_mode.dart';
-import 'package:pixora/core/platform/flash_service.dart'
-    show FlashService;
+import 'package:pixora/core/platform/flash_service.dart' show FlashService;
 import '../../../core/constants/app_filters.dart';
 import '../models/filter_model.dart';
 
 /// Flash modes supported by the camera
 enum FlashModeX { off, on, auto }
 
-/// Controls camera modes, filters, flash, and recording state
 class CameraControllerX extends ChangeNotifier {
   // -------------------- Filter Controller --------------------
   late final PageController filterPageController;
@@ -19,6 +17,9 @@ class CameraControllerX extends ChangeNotifier {
   int selectedMode = 0;
   int selectedFilter = 2;
   bool isRecording = false;
+  FlashModeX flashMode = FlashModeX.off;
+  bool isFrontCamera = false;
+  bool isCameraReady = false;
 
   // -------------------- ⏱ RECORDING TIMER --------------------
   Timer? _recordTimer;
@@ -47,16 +48,27 @@ class CameraControllerX extends ChangeNotifier {
   }
 
   // -------------------- Flash --------------------
-  FlashModeX flashMode = FlashModeX.off;
-  bool isFrontCamera = false;
 
   void onCameraSwitched() {
     isFrontCamera = !isFrontCamera;
+
+    // Always disable flash when switching camera
+    flashMode = FlashModeX.off;
+    FlashService.setFlashMode(FlashModeX.off);
+
     notifyListeners();
   }
 
   Future<void> toggleFlashMode() async {
-    if (isFrontCamera) return;
+    if (!isCameraReady) {
+      debugPrint("Flash ignored: camera not ready");
+      return;
+    }
+
+    if (isFrontCamera) {
+      debugPrint("Flash ignored: front camera");
+      return;
+    }
 
     if (flashMode == FlashModeX.off) {
       flashMode = FlashModeX.on;
@@ -66,15 +78,13 @@ class CameraControllerX extends ChangeNotifier {
       flashMode = FlashModeX.off;
     }
 
-    notifyListeners();
-
     try {
-      if (flashMode == FlashModeX.on) {
-        await FlashService.setFlashMode(FlashModeX.on);
-      } else {}
+      await FlashService.setFlashMode(flashMode);
     } catch (e) {
-      debugPrint('Flash channel not ready yet: $e');
+      debugPrint("Flash channel error: $e");
     }
+
+    notifyListeners();
   }
 
   IconData get flashIcon {
@@ -149,6 +159,9 @@ class CameraControllerX extends ChangeNotifier {
   @override
   void dispose() {
     _recordTimer?.cancel();
+    isCameraReady = false;
+    flashMode = FlashModeX.off;
+    FlashService.setFlashMode(FlashModeX.off);
     filterPageController.dispose();
     super.dispose();
   }
