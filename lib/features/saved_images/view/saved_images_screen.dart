@@ -1,16 +1,18 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:pixora/features/saved_images/controller/saved_images_controller.dart';
+import 'package:pixora/features/saved_images/models/media_type.dart';
+import 'package:pixora/features/saved_images/widgets/video_playing_screen.dart';
+import 'package:pixora/features/saved_images/widgets/video_thumbnail.dart';
 import 'package:provider/provider.dart';
 import '../widgets/image_viewer_screen.dart';
 
-class SavedImagesScreen extends StatelessWidget {
-  const SavedImagesScreen({super.key});
+class SavedMediaScreen extends StatelessWidget {
+  const SavedMediaScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => SavedImagesController()..loadImages(),
+      create: (_) => SavedImagesController()..loadMedia(),
       child: const _SavedImagesView(),
     );
   }
@@ -41,7 +43,7 @@ class _SavedImagesView extends StatelessWidget {
       );
     }
 
-    if (controller.images.isEmpty) {
+    if (controller.media.isEmpty) {
       return const Center(
         child: Text('No images found', style: TextStyle(color: Colors.white70)),
       );
@@ -54,27 +56,64 @@ class _SavedImagesView extends StatelessWidget {
         mainAxisSpacing: 6,
         crossAxisSpacing: 6,
       ),
-      itemCount: controller.images.length,
+      itemCount: controller.media.length,
       itemBuilder: (_, index) {
-        final File image = controller.images[index];
+        final item = controller.media[index];
 
         return GestureDetector(
           onTap: () async {
-            final bool? deleted = await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => ImageViewerScreen(image: image),
-              ),
-            );
-            if (!context.mounted) return;
-            if (deleted == true) {
-              context.read<SavedImagesController>().loadImages();
+            if (item.type == MediaType.image) {
+              final deleted = await Navigator.push<bool>(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ImageViewerScreen(mediaItem: item),
+                ),
+              );
+
+              if (deleted == true) {
+                controller.loadMedia();
+              }
+            } else {
+              final deleted = await Navigator.push<bool>(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => VideoPlayerScreen(mediaItem: item),
+                ),
+              );
+
+              if (deleted == true) {
+                controller.loadMedia();
+              }
             }
           },
 
-          child: Image.file(image, fit: BoxFit.cover),
+          child: _MediaTile(item: item),
         );
       },
+    );
+  }
+}
+
+class _MediaTile extends StatelessWidget {
+  final MediaItem item;
+
+  const _MediaTile({required this.item});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        item.type == MediaType.image
+            ? Image.file(item.file, fit: BoxFit.cover)
+            :
+             VideoThumbnail(file: item.file),
+
+        if (item.type == MediaType.video)
+          const Center(
+            child: Icon(Icons.play_circle_fill, color: Colors.white, size: 40),
+          ),
+      ],
     );
   }
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:pixora/core/theme/app_colors.dart';
-
 class SplashLogo extends StatelessWidget {
   final Animation<double> scale;
   final Animation<double> rotation;
@@ -18,6 +17,7 @@ class SplashLogo extends StatelessWidget {
     return Stack(
       alignment: Alignment.center,
       children: [
+        // Rotating neon ring
         Transform.rotate(
           angle: rotation.value,
           child: Container(
@@ -27,15 +27,17 @@ class SplashLogo extends StatelessWidget {
               shape: BoxShape.circle,
               gradient: SweepGradient(
                 colors: [
-                  AppColors.primaryGreen,
-                  AppColors.primaryTeal,
-                  AppColors.primaryLime,
-                  AppColors.primaryGreen,
+                  AppColors.neonCyan,
+                  AppColors.electricBlue,
+                  AppColors.neonPurple,
+                  AppColors.neonCyan,
                 ],
               ),
             ),
           ),
         ),
+
+        // Inner glowing circle + logo
         Transform.scale(
           scale: scale.value,
           child: Container(
@@ -43,11 +45,20 @@ class SplashLogo extends StatelessWidget {
             height: 140,
             decoration: const BoxDecoration(
               shape: BoxShape.circle,
-              gradient: LinearGradient(
-                colors: [AppColors.primaryGreen, AppColors.primaryTeal],
+              gradient: RadialGradient(
+                colors: [
+                  AppColors.neonCyan,
+                  AppColors.neonPurple,
+                ],
               ),
             ),
-            child: Image.asset(logoUrl, fit: BoxFit.contain,),
+            child: Padding(
+              padding: const EdgeInsets.all(18),
+              child: Image.asset(
+                logoUrl,
+                fit: BoxFit.contain,
+              ),
+            ),
           ),
         ),
       ],

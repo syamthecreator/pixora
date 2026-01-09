@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pixora/core/theme/app_colors.dart';
 import 'package:provider/provider.dart';
 
 import '../controller/settings_controller.dart';
@@ -52,7 +53,7 @@ class SettingsSwitchTile extends StatelessWidget {
             /// Track
             trackColor: WidgetStateProperty.resolveWith((states) {
               if (states.contains(WidgetState.selected)) {
-                return const Color(0xFF2B2412); // dark gold track
+                return AppColors.neonPurple; // dark gold track
               }
               return const Color(0xFF2A2A2A); // dark grey
             }),
@@ -60,7 +61,7 @@ class SettingsSwitchTile extends StatelessWidget {
             /// Border ring thumb
             thumbColor: WidgetStateProperty.resolveWith((states) {
               if (states.contains(WidgetState.selected)) {
-                return const Color(0xFFFFC857); // gold ring
+                return AppColors.white; // gold ring
               }
               return const Color(0xFFB0B0B0); // grey ring
             }),

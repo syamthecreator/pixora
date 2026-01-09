@@ -1,36 +1,38 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:pixora/features/saved_images/models/media_type.dart';
 import 'package:provider/provider.dart';
 import 'package:pixora/features/saved_images/controller/saved_images_controller.dart';
 
 class ImageViewerScreen extends StatelessWidget {
-  final File image;
+  final MediaItem mediaItem;
 
   const ImageViewerScreen({
     super.key,
-    required this.image,
+    required this.mediaItem,
   });
 
-  Future<void> _deleteImage(
+  Future<void> _deleteMedia(
     BuildContext context,
     SavedImagesController controller,
+    MediaItem item,
   ) async {
     if (controller.isDeleting) return;
 
     // 🔔 Haptic feedback
     HapticFeedback.mediumImpact();
 
-    final bool deleted =
-        await controller.deleteImage(image);
+    final bool deleted = await controller.deleteMedia(item);
 
     if (!context.mounted) return;
 
     if (deleted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Image deleted'),
-          duration: Duration(seconds: 2),
+        SnackBar(
+          content: Text(
+            item.type == MediaType.image ? 'Image deleted' : 'Video deleted',
+          ),
+          duration: const Duration(seconds: 2),
         ),
       );
 
@@ -47,41 +49,33 @@ class ImageViewerScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller =
-        context.watch<SavedImagesController>();
+    final controller = context.watch<SavedImagesController>();
 
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        elevation: 0,
-      ),
+      appBar: AppBar(backgroundColor: Colors.black, elevation: 0),
       body: Stack(
         children: [
-          // -------- IMAGE --------
           Center(
             child: InteractiveViewer(
               minScale: 1,
               maxScale: 4,
-              child: Image.file(image),
+              child: Image.file(mediaItem.file),
             ),
           ),
 
-          // -------- DELETE BUTTON --------
           Positioned(
             bottom: 30,
             left: 0,
             right: 0,
             child: Center(
               child: FloatingActionButton(
-                backgroundColor:
-                    controller.isDeleting
-                        ? Colors.grey
-                        : Colors.red,
+                backgroundColor: controller.isDeleting
+                    ? Colors.grey
+                    : Colors.red,
                 onPressed: controller.isDeleting
                     ? null
-                    : () =>
-                        _deleteImage(context, controller),
+                    : () => _deleteMedia(context, controller, mediaItem),
                 child: controller.isDeleting
                     ? const SizedBox(
                         width: 24,

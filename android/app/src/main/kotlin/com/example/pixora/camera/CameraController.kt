@@ -1,7 +1,9 @@
 package com.example.pixora.camera
 
+import androidx.camera.core.Camera
 import android.content.ContentValues
 import android.content.Context
+import android.graphics.*
 import android.provider.MediaStore
 import android.util.Log
 import androidx.camera.core.*
@@ -10,11 +12,17 @@ import androidx.camera.video.*
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
+import jp.co.cyberagent.android.gpuimage.GPUImage
+import jp.co.cyberagent.android.gpuimage.GPUImageView
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
 
 class CameraController(
     private val context: Context,
-    private val previewView: PreviewView
-) {
+    private val gpuImageView: GPUImageView
+)
+
+ {
 
     private val TAG = "PixoraCamera"
 
@@ -24,65 +32,105 @@ class CameraController(
     private var videoCapture: VideoCapture<Recorder>? = null
     private var activeRecording: Recording? = null
 
+    // 🔥 FILTER
+    private lateinit var gpuImage: GPUImage
+    private var currentFilter = FilterType.NONE
+
     // 🔑 REQUIRED for torch control
     private var camera: Camera? = null
 
     // ---------------- CAMERA START ----------------
 
-    fun startCamera(lifecycleOwner: LifecycleOwner) {
-        Log.d(TAG, "startCamera() called")
-        Log.d(
-            TAG,
-            "Lens facing: ${if (lensFacing == CameraSelector.LENS_FACING_BACK) "BACK" else "FRONT"}"
+   fun startCamera(lifecycleOwner: LifecycleOwner) {
+    Log.d(TAG, "startCamera() called")
+
+    gpuImage = GPUImage(context)
+    gpuImage.setFilter(FilterFactory.create(currentFilter))
+    gpuImageView.setFilter(FilterFactory.create(currentFilter))
+
+    val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+
+    cameraProviderFuture.addListener({
+        val cameraProvider = cameraProviderFuture.get()
+
+        // -------- LIVE FILTER PREVIEW --------
+        val imageAnalysis = ImageAnalysis.Builder()
+            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+            .build()
+
+        imageAnalysis.setAnalyzer(
+            ContextCompat.getMainExecutor(context)
+        ) { imageProxy ->
+            try {
+               val bitmap = imageProxy.toBitmap()
+                val rotatedBitmap = bitmap.rotate(imageProxy.imageInfo.rotationDegrees)
+                gpuImageView.setImage(rotatedBitmap)
+
+            } catch (e: Exception) {
+                Log.e(TAG, "Live filter error", e)
+            } finally {
+                imageProxy.close()
+            }
+        }
+
+        // -------- PHOTO --------
+        imageCapture = ImageCapture.Builder()
+            .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+            .setFlashMode(ImageCapture.FLASH_MODE_OFF)
+            .build()
+
+        // -------- VIDEO --------
+        val recorder = Recorder.Builder()
+            .setQualitySelector(QualitySelector.from(Quality.HIGHEST))
+            .build()
+
+        videoCapture = VideoCapture.withOutput(recorder)
+
+        val selector = CameraSelector.Builder()
+            .requireLensFacing(lensFacing)
+            .build()
+
+        cameraProvider.unbindAll()
+
+        camera = cameraProvider.bindToLifecycle(
+            lifecycleOwner,
+            selector,
+            imageAnalysis,
+            imageCapture,
+            videoCapture
         )
 
-        val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+        Log.d(TAG, "Camera bound with LIVE GPUImage filter preview")
 
-        cameraProviderFuture.addListener({
-            val cameraProvider = cameraProviderFuture.get()
-            Log.d(TAG, "CameraProvider obtained")
+    }, ContextCompat.getMainExecutor(context))
+}
 
-            // -------- Preview --------
-            val preview = Preview.Builder().build()
-            preview.setSurfaceProvider(previewView.surfaceProvider)
-            Log.d(TAG, "Preview use-case created")
 
-            // -------- Photo --------
-            imageCapture = ImageCapture.Builder()
-                .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
-                .setFlashMode(ImageCapture.FLASH_MODE_OFF)
-                .build()
-            Log.d(TAG, "ImageCapture use-case created")
+    // ---------------- FILTER CONTROL ----------------
 
-            // -------- Video --------
-            val recorder = Recorder.Builder()
-                .setQualitySelector(QualitySelector.from(Quality.HIGHEST))
-                .build()
+    fun setFilter(filterName: String) {
 
-            videoCapture = VideoCapture.withOutput(recorder)
-            Log.d(TAG, "VideoCapture use-case created")
+    val normalized = filterName
+        .trim()
+        .uppercase()
+        .replace(" ", "_")
 
-            val selector = CameraSelector.Builder()
-                .requireLensFacing(lensFacing)
-                .build()
-
-            cameraProvider.unbindAll()
-
-            // 🔑 SAVE Camera reference (needed for torch)
-            camera = cameraProvider.bindToLifecycle(
-                lifecycleOwner,
-                selector,
-                preview,
-                imageCapture,
-                videoCapture
-            )
-
-            Log.d(TAG, "Camera bound to lifecycle successfully")
-
-        }, ContextCompat.getMainExecutor(context))
+    currentFilter = try {
+        FilterType.valueOf(normalized)
+    } catch (e: Exception) {
+        Log.e(TAG, "Invalid filter name: $filterName", e)
+        FilterType.NONE
     }
 
-    // ---------------- TORCH CONTROL (CameraX ONLY) ----------------
+    val filter = FilterFactory.create(currentFilter)
+    gpuImage.setFilter(filter)
+    gpuImageView.setFilter(filter)
+
+    Log.d(TAG, "LIVE Filter changed to: $currentFilter")
+}
+
+
+    // ---------------- TORCH CONTROL ----------------
 
     fun setTorch(enabled: Boolean) {
         if (lensFacing == CameraSelector.LENS_FACING_FRONT) {
@@ -94,14 +142,24 @@ class CameraController(
         Log.d(TAG, "CameraX torch set to: $enabled")
     }
 
+
+    fun setFlashMode(mode: String) {
+    imageCapture?.flashMode = when (mode) {
+        "on" -> ImageCapture.FLASH_MODE_OFF   // torch handles light
+        "auto" -> ImageCapture.FLASH_MODE_AUTO
+        else -> ImageCapture.FLASH_MODE_OFF
+    }
+
+    Log.d(TAG, "ImageCapture flashMode set to $mode")
+}
+
+
     // ---------------- SWITCH CAMERA ----------------
 
     fun switchCamera(lifecycleOwner: LifecycleOwner) {
         Log.d(TAG, "switchCamera() called")
 
         stopRecording()
-
-        // Always turn torch OFF when switching camera
         setTorch(false)
 
         lensFacing =
@@ -110,15 +168,12 @@ class CameraController(
             else
                 CameraSelector.LENS_FACING_BACK
 
-        Log.d(
-            TAG,
-            "Camera switched. New lens: ${if (lensFacing == CameraSelector.LENS_FACING_BACK) "BACK" else "FRONT"}"
-        )
+        Log.d(TAG, "Camera switched")
 
         startCamera(lifecycleOwner)
     }
 
-    // ---------------- PHOTO ----------------
+    // ---------------- PHOTO (UNCHANGED) ----------------
 
     fun takePhoto(
         flashMode: String,
@@ -126,40 +181,9 @@ class CameraController(
     ) {
         Log.d(TAG, "takePhoto() called with flashMode=$flashMode")
 
-        val capture = imageCapture ?: run {
-            Log.e(TAG, "ImageCapture is NULL")
-            return
-        }
-
-        capture.flashMode =
-            if (lensFacing == CameraSelector.LENS_FACING_FRONT) {
-                Log.d(TAG, "Front camera → Flash FORCED OFF")
-                ImageCapture.FLASH_MODE_OFF
-            } else {
-                when (flashMode) {
-
-                    // 🔥 FLASH ON → torch already ON
-                    "on" -> {
-                        Log.d(TAG, "FLASH ON → Torch handles lighting, capture flash OFF")
-                        ImageCapture.FLASH_MODE_OFF
-                    }
-
-                    // ⚡ AUTO → CameraX decides
-                    "auto" -> {
-                        Log.d(TAG, "FLASH AUTO → CameraX AUTO flash")
-                        ImageCapture.FLASH_MODE_AUTO
-                    }
-
-                    // 🌑 OFF
-                    else -> {
-                        Log.d(TAG, "FLASH OFF")
-                        ImageCapture.FLASH_MODE_OFF
-                    }
-                }
-            }
+        val capture = imageCapture ?: return
 
         val fileName = "IMG_${System.currentTimeMillis()}"
-        Log.d(TAG, "Preparing capture file: $fileName")
 
         val contentValues = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
@@ -167,15 +191,11 @@ class CameraController(
             put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/Pixora")
         }
 
-        val outputOptions = ImageCapture.OutputFileOptions
-            .Builder(
-                context.contentResolver,
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                contentValues
-            )
-            .build()
-
-        Log.d(TAG, "Calling ImageCapture.takePicture()")
+        val outputOptions = ImageCapture.OutputFileOptions.Builder(
+            context.contentResolver,
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            contentValues
+        ).build()
 
         capture.takePicture(
             outputOptions,
@@ -195,18 +215,14 @@ class CameraController(
         )
     }
 
-    // ---------------- VIDEO ----------------
+    // ---------------- VIDEO (UNCHANGED) ----------------
 
     fun startRecording(onResult: (String?) -> Unit) {
         Log.d(TAG, "startRecording() called")
 
-        val video = videoCapture ?: run {
-            Log.e(TAG, "VideoCapture is NULL")
-            return
-        }
+        val video = videoCapture ?: return
 
         val fileName = "VID_${System.currentTimeMillis()}"
-        Log.d(TAG, "Recording file: $fileName")
 
         val contentValues = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
@@ -214,29 +230,20 @@ class CameraController(
             put(MediaStore.Video.Media.RELATIVE_PATH, "Movies/Pixora")
         }
 
-        val outputOptions = MediaStoreOutputOptions
-            .Builder(
-                context.contentResolver,
-                MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-            )
-            .setContentValues(contentValues)
-            .build()
+        val outputOptions = MediaStoreOutputOptions.Builder(
+            context.contentResolver,
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+        ).setContentValues(contentValues).build()
 
         activeRecording = video.output
             .prepareRecording(context, outputOptions)
             .withAudioEnabled()
             .start(ContextCompat.getMainExecutor(context)) { event ->
-
                 when (event) {
-                    is VideoRecordEvent.Start -> {
+                    is VideoRecordEvent.Start ->
                         Log.d(TAG, "Video recording STARTED")
-                    }
-
                     is VideoRecordEvent.Finalize -> {
-                        Log.d(
-                            TAG,
-                            "Video recording FINALIZED: ${event.outputResults.outputUri}"
-                        )
+                        Log.d(TAG, "Video recording FINALIZED")
                         onResult(event.outputResults.outputUri?.toString())
                         activeRecording = null
                     }
@@ -245,12 +252,62 @@ class CameraController(
     }
 
     fun stopRecording() {
-        if (activeRecording != null) {
-            Log.d(TAG, "stopRecording() → stopping active recording")
-            activeRecording?.stop()
-            activeRecording = null
-        } else {
-            Log.d(TAG, "stopRecording() → no active recording")
-        }
+        activeRecording?.stop()
+        activeRecording = null
     }
+}
+
+// ---------------- IMAGE EXTENSION ----------------
+
+private fun ImageProxy.toBitmap(): Bitmap {
+    val yBuffer = planes[0].buffer
+    val uBuffer = planes[1].buffer
+    val vBuffer = planes[2].buffer
+
+    val ySize = yBuffer.remaining()
+    val uSize = uBuffer.remaining()
+    val vSize = vBuffer.remaining()
+
+    val nv21 = ByteArray(ySize + uSize + vSize)
+
+    yBuffer.get(nv21, 0, ySize)
+    vBuffer.get(nv21, ySize, vSize)
+    uBuffer.get(nv21, ySize + vSize, uSize)
+
+    val yuvImage = YuvImage(
+        nv21,
+        ImageFormat.NV21,
+        width,
+        height,
+        null
+    )
+
+    val out = ByteArrayOutputStream()
+    yuvImage.compressToJpeg(Rect(0, 0, width, height), 90, out)
+
+    val bitmap = BitmapFactory.decodeByteArray(
+        out.toByteArray(),
+        0,
+        out.size()
+    )
+
+    return bitmap.rotate(imageInfo.rotationDegrees)
+}
+
+private fun Bitmap.rotate(degrees: Int): Bitmap {
+    if (degrees == 0) return this
+
+    val matrix = Matrix().apply {
+        postRotate(degrees.toFloat())
+    }
+
+    return Bitmap.createBitmap(
+        this,
+        0,
+        0,
+        width,
+        height,
+        matrix,
+        true
+    )
 }

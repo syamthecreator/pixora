@@ -14,7 +14,7 @@ class SettingsFooter extends StatelessWidget {
       child: Center(
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFB89B45),
+            backgroundColor: AppColors.neonPurple,
             padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(30),

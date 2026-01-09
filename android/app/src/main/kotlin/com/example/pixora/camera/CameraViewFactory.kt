@@ -2,11 +2,11 @@ package com.example.pixora.camera
 
 import android.content.Context
 import android.util.Log
-import androidx.camera.view.PreviewView
 import androidx.lifecycle.LifecycleOwner
 import io.flutter.plugin.common.StandardMessageCodec
 import io.flutter.plugin.platform.PlatformView
 import io.flutter.plugin.platform.PlatformViewFactory
+import jp.co.cyberagent.android.gpuimage.GPUImageView
 
 class CameraViewFactory(
     private val lifecycleOwner: LifecycleOwner
@@ -23,27 +23,29 @@ class CameraViewFactory(
 
         return object : PlatformView {
 
-            private val previewView = PreviewView(context).apply {
-                Log.d(TAG, "Initializing PreviewView")
+            // 🔥 REPLACED PreviewView WITH GPUImageView (REQUIRED)
+            private val gpuImageView = GPUImageView(context).apply {
+        layoutParams = android.view.ViewGroup.LayoutParams(
+            android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+            android.view.ViewGroup.LayoutParams.MATCH_PARENT
+        )
+    }
 
-                scaleType = PreviewView.ScaleType.FILL_CENTER
-                implementationMode = PreviewView.ImplementationMode.COMPATIBLE
-
-                Log.d(
-                    TAG,
-                    "PreviewView configured | scaleType=FILL_CENTER | implementation=COMPATIBLE"
-                )
-            }
 
             init {
                 Log.d(TAG, "Initializing CameraController")
-                cameraController = CameraController(context, previewView)
+
+                // 🔥 PASS GPUImageView TO CONTROLLER
+                cameraController = CameraController(
+                    context,
+                    gpuImageView
+                )
 
                 Log.d(TAG, "Starting camera from PlatformView")
                 cameraController.startCamera(lifecycleOwner)
             }
 
-            override fun getView() = previewView
+            override fun getView() = gpuImageView
 
             override fun dispose() {
                 Log.d(TAG, "Disposing Camera PlatformView")

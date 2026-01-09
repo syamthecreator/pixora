@@ -1,8 +1,10 @@
 class FilterModel {
-  final String name;
+  final String key;   // ENUM KEY
+  final String name;  // DISPLAY NAME
   final String image;
 
-  const FilterModel({
+  FilterModel({
+    required this.key,
     required this.name,
     required this.image,
   });

@@ -28,22 +28,21 @@ class FlashController {
 
         when (mode) {
 
-            // 🔥 FLASH ON (continuous light)
-            "on" -> {
-                Log.d(TAG, "FLASH ON → CameraX torch ENABLED")
-                cameraController.setTorch(true)
-            }
+    "on" -> {
+        cameraController.setTorch(true)
+        cameraController.setFlashMode("on")
+    }
 
-            // ⚡ FLASH AUTO or 🌑 FLASH OFF
-            "auto", "off", null -> {
-                Log.d(TAG, "FLASH AUTO/OFF → CameraX torch DISABLED")
-                cameraController.setTorch(false)
-            }
+    "auto" -> {
+        cameraController.setTorch(false)
+        cameraController.setFlashMode("auto")
+    }
 
-            else -> {
-                Log.w(TAG, "Unknown flash mode: $mode → torch OFF")
-                cameraController.setTorch(false)
-            }
-        }
+    else -> {
+        cameraController.setTorch(false)
+        cameraController.setFlashMode("off")
+    }
+}
+
     }
 }

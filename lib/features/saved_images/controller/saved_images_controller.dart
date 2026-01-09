@@ -1,56 +1,75 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:pixora/core/platform/media_service.dart';
+import 'package:pixora/features/saved_images/models/media_type.dart';
 
 class SavedImagesController extends ChangeNotifier {
-  /// 🔁 CHANGE THIS IF NEEDED
-  final Directory imageDir = Directory('/storage/emulated/0/Pictures/Pixora');
+  final Directory imageDir =
+      Directory('/storage/emulated/0/Pictures/Pixora');
 
-  final List<File> images = [];
+  final Directory videoDir =
+      Directory('/storage/emulated/0/Movies/Pixora');
+
+  final List<MediaItem> media = [];
 
   bool isLoading = false;
   bool isDeleting = false;
 
-  Future<void> loadImages() async {
-    if (!imageDir.existsSync()) return;
-
+  Future<void> loadMedia() async {
     isLoading = true;
     notifyListeners();
 
-    final files = imageDir
-        .listSync()
-        .whereType<File>()
-        .where(
-          (file) => file.path.endsWith('.jpg') || file.path.endsWith('.png'),
-        )
-        .toList();
+    final List<MediaItem> items = [];
 
-    files.sort((a, b) => b.lastModifiedSync().compareTo(a.lastModifiedSync()));
+    if (imageDir.existsSync()) {
+      final images = imageDir
+          .listSync()
+          .whereType<File>()
+          .where((f) =>
+              f.path.endsWith('.jpg') ||
+              f.path.endsWith('.png'))
+          .map((f) => MediaItem(file: f, type: MediaType.image));
+      items.addAll(images);
+    }
 
-    images
+    if (videoDir.existsSync()) {
+      final videos = videoDir
+          .listSync()
+          .whereType<File>()
+          .where((f) =>
+              f.path.endsWith('.mp4') ||
+              f.path.endsWith('.mov'))
+          .map((f) => MediaItem(file: f, type: MediaType.video));
+      items.addAll(videos);
+    }
+
+    items.sort((a, b) =>
+        b.file.lastModifiedSync()
+            .compareTo(a.file.lastModifiedSync()));
+
+    media
       ..clear()
-      ..addAll(files);
+      ..addAll(items);
 
     isLoading = false;
     notifyListeners();
   }
 
-  /// 🔥 DELETE IMAGE (NO setState)
-  Future<bool> deleteImage(File image) async {
+  Future<bool> deleteMedia(MediaItem item) async {
     if (isDeleting) return false;
 
     isDeleting = true;
     notifyListeners();
 
-    final bool deleted = await MediaDeleteService.deleteImage(image.path);
+    final deleted =
+        await MediaDeleteService.deleteImage(item.file.path);
 
     if (deleted) {
-      images.remove(image);
+      media.remove(item);
     }
 
     isDeleting = false;
     notifyListeners();
-
     return deleted;
   }
 }

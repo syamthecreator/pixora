@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'core/theme/app_theme.dart';
 
 void main() {
+    WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -19,7 +20,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: AppTheme.darkTheme,
         routes: AppRoutes.routes,
-        initialRoute: AppRoutes.splash,
+        initialRoute: AppRoutes.welcome,
       ),
     );
   }

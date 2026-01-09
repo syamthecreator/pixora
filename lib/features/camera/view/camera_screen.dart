@@ -19,7 +19,6 @@ class CameraScreen extends StatefulWidget {
 
 class _CameraScreenState extends State<CameraScreen>
     with WidgetsBindingObserver {
-
   @override
   void initState() {
     super.initState();
@@ -90,6 +89,7 @@ class _CameraScreenState extends State<CameraScreen>
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
+              padding: EdgeInsets.all(10),
               decoration: const BoxDecoration(
                 color: AppColors.black,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(28)),

@@ -207,14 +207,14 @@ class _OptionTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          color: isActive ? AppColors.activeOption : AppColors.inactiveOption,
+          color: isActive ? AppColors.neonPurple: AppColors.inactiveOption,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Center(
           child: Text(
             label,
             style: TextStyle(
-              color: isActive ? Colors.black : Colors.white,
+              color: isActive ? Colors.white : Colors.white,
               fontWeight: FontWeight.w600,
               fontSize: 14,
             ),
@@ -245,14 +245,14 @@ class _ToggleTile extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 14),
           decoration: BoxDecoration(
-            color: isActive ? AppColors.activeOption : AppColors.inactiveOption,
+            color: isActive ? AppColors.neonPurple: AppColors.inactiveOption,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Center(
             child: Text(
               label,
               style: TextStyle(
-                color: isActive ? Colors.black : Colors.white,
+                color: isActive ? Colors.white : Colors.white,
                 fontWeight: FontWeight.w600,
                 fontSize: 14,
               ),

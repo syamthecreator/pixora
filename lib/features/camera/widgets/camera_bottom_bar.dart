@@ -48,7 +48,7 @@ class _GalleryButton extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => const SavedImagesScreen(),
+            builder: (_) => const SavedMediaScreen(),
           ),
         );
       },
@@ -235,7 +235,7 @@ class _MiddleRing extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
-          color: isPhoto ? AppColors.kAccentYellow : Colors.black,
+          color: isPhoto ? AppColors.neonPurple: Colors.black,
           width: 3,
         ),
       ),

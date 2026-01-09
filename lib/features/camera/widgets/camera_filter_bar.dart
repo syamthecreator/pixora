@@ -100,7 +100,7 @@ class _FilterImage extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
-              color: isActive ? AppColors.kAccentYellow : Colors.white24,
+              color: isActive ? AppColors.neonPurple : Colors.white24,
               width: 2,
             ),
           ),
@@ -125,7 +125,7 @@ class _FilterLabel extends StatelessWidget {
       child: Text(
         name.toUpperCase(),
         style: const TextStyle(
-          color: AppColors.kAccentYellow,
+          color: AppColors.neonPurple,
           fontSize: 11,
           letterSpacing: 1,
           fontWeight: FontWeight.w600,

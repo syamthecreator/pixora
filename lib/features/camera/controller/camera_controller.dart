@@ -26,12 +26,28 @@ class CameraControllerX extends ChangeNotifier {
   Duration recordingDuration = Duration.zero;
 
   // -------------------- Filters --------------------
+  // final List<FilterModel> filters = [
+  //   FilterModel(name: "Moody", image: AppFilters.moody),
+  //   FilterModel(name: "Vintage", image: AppFilters.vintage),
+  //   FilterModel(name: "Natural", image: AppFilters.natural),
+  //   FilterModel(name: "Cinematic", image: AppFilters.cinematic),
+  //   FilterModel(name: "Vibrant", image: AppFilters.vibrant),
+  // ];
+
   final List<FilterModel> filters = [
-    FilterModel(name: "Moody", image: AppFilters.moody),
-    FilterModel(name: "Vintage", image: AppFilters.vintage),
-    FilterModel(name: "Natural", image: AppFilters.natural),
-    FilterModel(name: "Cinematic", image: AppFilters.cinematic),
-    FilterModel(name: "Vibrant", image: AppFilters.vibrant),
+    FilterModel(
+      key: "CINEMATIC",
+      name: "Cinematic",
+      image: AppFilters.cinematic,
+    ),
+    FilterModel(key: "WARM_GLOW", name: "Warm Glow", image: AppFilters.vintage),
+    FilterModel(key: "URBAN_POP", name: "Urban Pop", image: AppFilters.natural),
+    FilterModel(
+      key: "SOFT_FILM",
+      name: "Soft Film",
+      image: AppFilters.cinematic,
+    ),
+    FilterModel(key: "VIVID_POP", name: "Vivid Pop", image: AppFilters.moody),
   ];
 
   CameraControllerX() {
@@ -42,8 +58,14 @@ class CameraControllerX extends ChangeNotifier {
   }
 
   // -------------------- Filters --------------------
-  void changeFilter(int index) {
+  Future<void> changeFilter(int index) async {
     selectedFilter = index;
+
+    await const MethodChannel('pixora/camera').invokeMethod(
+      'setFilter',
+      {'filter': filters[index].key}, // 🔥 ENUM KEY
+    );
+
     notifyListeners();
   }
 

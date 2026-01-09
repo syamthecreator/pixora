@@ -112,6 +112,13 @@ class MainActivity : FlutterActivity() {
                     result.success(null)
                 }
 
+                "setFilter" -> {
+                    val filter = call.argument<String>("filter") ?: "none"
+                    Log.d(TAG, "Set filter requested: $filter")
+                    CameraViewFactory.cameraController.setFilter(filter)
+                    result.success(null)
+                }
+
                 else -> result.notImplemented()
             }
         }
