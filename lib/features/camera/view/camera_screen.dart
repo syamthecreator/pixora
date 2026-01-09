@@ -1,14 +1,53 @@
 import 'package:flutter/material.dart';
 import 'package:pixora/core/theme/app_colors.dart';
+import 'package:pixora/core/utils/permission_handler.dart';
 import 'package:pixora/features/camera/widgets/camera_bottom_bar.dart';
 import 'package:pixora/features/camera/widgets/camera_filter_bar.dart';
 import 'package:pixora/features/camera/widgets/camera_preview.dart';
 import 'package:pixora/features/camera/widgets/camera_top_bar.dart';
 import 'package:pixora/features/settings/controller/settings_controller.dart';
+import 'package:pixora/routes/app_routes.dart';
 import 'package:provider/provider.dart';
 
-class CameraScreen extends StatelessWidget {
+class CameraScreen extends StatefulWidget {
   const CameraScreen({super.key});
+
+  @override
+  State<CameraScreen> createState() => _CameraScreenState();
+}
+
+class _CameraScreenState extends State<CameraScreen>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _checkPermission();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  Future<void> _checkPermission() async {
+    final ok = await checkCameraMicAndMediaPermission();
+    if (!ok && mounted) {
+      Navigator.pushReplacementNamed(context, AppRoutes.permission);
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    if (state == AppLifecycleState.resumed) {
+      final ok = await checkCameraMicAndMediaPermission();
+
+      if (!ok && mounted) {
+        Navigator.pushReplacementNamed(context, AppRoutes.permission);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,10 +57,8 @@ class CameraScreen extends StatelessWidget {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // 🔥 CAMERA BACKGROUND (FULL SCREEN)
-          const Positioned.fill(
-            child: CameraPreviewView(),
-          ),
+          // 🔥 CAMERA BACKGROUND
+          const Positioned.fill(child: CameraPreviewView()),
 
           // 🔝 TOP BAR
           SafeArea(
@@ -29,8 +66,7 @@ class CameraScreen extends StatelessWidget {
             child: Align(
               alignment: Alignment.topCenter,
               child: CameraTopBar(
-                onTapSettingsIcon: () =>
-                    settings.showQuickSettings(context),
+                onTapSettingsIcon: () => settings.showQuickSettings(context),
               ),
             ),
           ),
@@ -49,8 +85,7 @@ class CameraScreen extends StatelessWidget {
             child: Container(
               decoration: const BoxDecoration(
                 color: AppColors.black,
-                borderRadius:
-                    BorderRadius.vertical(top: Radius.circular(28)),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
               ),
               child: const CameraBottomBar(),
             ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:pixora/core/utils/camera_permission.dart';
+import 'package:pixora/core/utils/permission_handler.dart';
 import 'package:pixora/routes/app_routes.dart';
 import 'package:provider/provider.dart';
 import 'welcome_controller.dart';
@@ -36,14 +36,19 @@ class WelcomeAnimationController {
     );
   }
 
-  Future<void> continueFlow(BuildContext context) async {
+  Future<void> continueFlowFromWelcome(BuildContext context) async {
     HapticFeedback.lightImpact();
     await context.read<WelcomeController>().markCompleted();
 
     if (!context.mounted) return;
 
-    final allowed = await ensureCameraPermission(context);
-    if (!allowed) return;
+    final hasPermission = await checkCameraMicAndMediaPermission();
+    if (!context.mounted) return;
+
+    if (!hasPermission) {
+      Navigator.pushReplacementNamed(context, AppRoutes.permission);
+      return;
+    }
     if (!context.mounted) return;
 
     Navigator.pushReplacementNamed(context, AppRoutes.cameraScreen);

@@ -36,7 +36,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       body: GestureDetector(
         onHorizontalDragEnd: (d) {
           if (d.primaryVelocity != null && d.primaryVelocity! < -300) {
-            anim.continueFlow(context);
+            anim.continueFlowFromWelcome(context);
           }
         },
         child: Stack(
@@ -54,7 +54,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     const Spacer(),
                     WelcomeContentSection(
                       fade: anim.fade,
-                      onTap: () => anim.continueFlow(context),
+                      onTap: () => anim.continueFlowFromWelcome(context),
                     ),
                     const SizedBox(height: 20),
 
@@ -75,7 +75,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                           child: WelcomeSwipeIndicator(
                             controller: anim.arrowController,
                             arrowOpacity: anim.arrowOpacity,
-                            onCompleted: () => anim.continueFlow(context),
+                            onCompleted: () =>
+                                anim.continueFlowFromWelcome(context),
                           ),
                         ),
                       ),

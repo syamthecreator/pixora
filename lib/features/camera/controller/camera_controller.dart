@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pixora/features/camera/models/camera_mode.dart';
-import 'package:pixora/features/camera/service/flash_service.dart'
+import 'package:pixora/core/platform/flash_service.dart'
     show FlashService;
 import '../../../core/constants/app_filters.dart';
 import '../models/filter_model.dart';
@@ -47,52 +47,46 @@ class CameraControllerX extends ChangeNotifier {
   }
 
   // -------------------- Flash --------------------
- FlashModeX flashMode = FlashModeX.off;
-bool isFrontCamera = false;
+  FlashModeX flashMode = FlashModeX.off;
+  bool isFrontCamera = false;
 
   void onCameraSwitched() {
     isFrontCamera = !isFrontCamera;
     notifyListeners();
   }
 
-Future<void> toggleFlashMode() async {
-  if (isFrontCamera) return;
+  Future<void> toggleFlashMode() async {
+    if (isFrontCamera) return;
 
-  // Cycle flash mode
-  if (flashMode == FlashModeX.off) {
-    flashMode = FlashModeX.on;
-  } else if (flashMode == FlashModeX.on) {
-    flashMode = FlashModeX.auto;
-  } else {
-    flashMode = FlashModeX.off;
-  }
-
-  notifyListeners(); // ✅ update UI immediately
-
-  // Apply TORCH only for BACK camera + FLASH ON
-  try {
-    if (flashMode == FlashModeX.on) {
-      await FlashService.setFlashMode(FlashModeX.on); // 🔦 torch ON
+    if (flashMode == FlashModeX.off) {
+      flashMode = FlashModeX.on;
+    } else if (flashMode == FlashModeX.on) {
+      flashMode = FlashModeX.auto;
     } else {
-      await FlashService.setFlashMode(FlashModeX.off); // 🔦 torch OFF
+      flashMode = FlashModeX.off;
     }
-  } catch (e) {
-    // 🔒 VERY IMPORTANT: prevents MissingPluginException crash
-    debugPrint('Flash channel not ready yet: $e');
-  }
-}
 
-IconData get flashIcon {
-  switch (flashMode) {
-    case FlashModeX.on:
-      return Icons.flash_on;
-    case FlashModeX.auto:
-      return Icons.flash_auto;
-    default:
-      return Icons.flash_off;
-  }
-}
+    notifyListeners();
 
+    try {
+      if (flashMode == FlashModeX.on) {
+        await FlashService.setFlashMode(FlashModeX.on);
+      } else {}
+    } catch (e) {
+      debugPrint('Flash channel not ready yet: $e');
+    }
+  }
+
+  IconData get flashIcon {
+    switch (flashMode) {
+      case FlashModeX.on:
+        return Icons.flash_on;
+      case FlashModeX.auto:
+        return Icons.flash_auto;
+      default:
+        return Icons.flash_off;
+    }
+  }
 
   // -------------------- Mode Helpers --------------------
   bool get isPhotoMode => selectedMode == CameraModes.photo.index;

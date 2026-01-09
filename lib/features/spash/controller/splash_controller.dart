@@ -1,6 +1,5 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:pixora/core/utils/camera_permission.dart';
 import 'package:pixora/features/welcome/controller/welcome_controller.dart';
 import 'package:pixora/routes/app_routes.dart';
 import 'package:provider/provider.dart';
@@ -39,7 +38,7 @@ class SplashController extends ChangeNotifier {
   }
 
   /// Navigates to camera screen after delay
-Future<void> navigate(BuildContext context) async {
+Future<void> navigateFromSplashScreen(BuildContext context) async {
   await Future.delayed(const Duration(seconds: 3));
   if (!context.mounted) return;
 
@@ -51,9 +50,6 @@ Future<void> navigate(BuildContext context) async {
   if (welcomeController.isFirstLaunch) {
     Navigator.pushReplacementNamed(context, AppRoutes.welcome);
   } else {
-    final allowed = await ensureCameraPermission(context);
-    if (!allowed) return;
-if(!context.mounted)return;
     Navigator.pushReplacementNamed(context, AppRoutes.cameraScreen);
   }
 }

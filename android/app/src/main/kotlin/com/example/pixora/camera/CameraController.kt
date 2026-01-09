@@ -3,6 +3,7 @@ package com.example.pixora.camera
 import android.content.ContentValues
 import android.content.Context
 import android.provider.MediaStore
+import android.util.Log
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.video.*
@@ -15,6 +16,8 @@ class CameraController(
     private val previewView: PreviewView
 ) {
 
+    private val TAG = "PixoraCamera"
+
     private var lensFacing = CameraSelector.LENS_FACING_BACK
 
     private var imageCapture: ImageCapture? = null
@@ -22,10 +25,14 @@ class CameraController(
     private var activeRecording: Recording? = null
 
     fun startCamera(lifecycleOwner: LifecycleOwner) {
+        Log.d(TAG, "Starting camera. Lens: ${if (lensFacing == CameraSelector.LENS_FACING_BACK) "BACK" else "FRONT"}")
+
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
 
         cameraProviderFuture.addListener({
             val cameraProvider = cameraProviderFuture.get()
+
+            Log.d(TAG, "Camera provider obtained")
 
             // -------- Preview --------
             val preview = Preview.Builder().build()
@@ -55,16 +62,24 @@ class CameraController(
                 imageCapture,
                 videoCapture
             )
+
+            Log.d(TAG, "Camera bound to lifecycle successfully")
+
         }, ContextCompat.getMainExecutor(context))
     }
 
     fun switchCamera(lifecycleOwner: LifecycleOwner) {
+        Log.d(TAG, "Switching camera")
+
         stopRecording()
+
         lensFacing =
             if (lensFacing == CameraSelector.LENS_FACING_BACK)
                 CameraSelector.LENS_FACING_FRONT
             else
                 CameraSelector.LENS_FACING_BACK
+
+        Log.d(TAG, "New lens facing: ${if (lensFacing == CameraSelector.LENS_FACING_BACK) "BACK" else "FRONT"}")
 
         startCamera(lifecycleOwner)
     }
@@ -75,21 +90,34 @@ class CameraController(
         flashMode: String,
         onResult: (String?) -> Unit
     ) {
-        val capture = imageCapture ?: return
+        val capture = imageCapture ?: run {
+            Log.e(TAG, "ImageCapture is null")
+            return
+        }
 
         capture.flashMode =
-    if (lensFacing == CameraSelector.LENS_FACING_FRONT) {
-        ImageCapture.FLASH_MODE_OFF
-    } else {
-        when (flashMode) {
-            "on" -> ImageCapture.FLASH_MODE_ON
-            "auto" -> ImageCapture.FLASH_MODE_AUTO
-            else -> ImageCapture.FLASH_MODE_OFF
-        }
-    }
-
+            if (lensFacing == CameraSelector.LENS_FACING_FRONT) {
+                Log.d(TAG, "Front camera detected. Flash OFF")
+                ImageCapture.FLASH_MODE_OFF
+            } else {
+                when (flashMode) {
+                    "on" -> {
+                        Log.d(TAG, "Flash mode: ON")
+                        ImageCapture.FLASH_MODE_ON
+                    }
+                    "auto" -> {
+                        Log.d(TAG, "Flash mode: AUTO")
+                        ImageCapture.FLASH_MODE_AUTO
+                    }
+                    else -> {
+                        Log.d(TAG, "Flash mode: OFF")
+                        ImageCapture.FLASH_MODE_OFF
+                    }
+                }
+            }
 
         val fileName = "IMG_${System.currentTimeMillis()}"
+        Log.d(TAG, "Capturing photo: $fileName")
 
         val contentValues = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
@@ -110,10 +138,12 @@ class CameraController(
             ContextCompat.getMainExecutor(context),
             object : ImageCapture.OnImageSavedCallback {
                 override fun onImageSaved(result: ImageCapture.OutputFileResults) {
+                    Log.d(TAG, "Photo saved successfully: ${result.savedUri}")
                     onResult(result.savedUri?.toString())
                 }
 
                 override fun onError(exception: ImageCaptureException) {
+                    Log.e(TAG, "Photo capture failed", exception)
                     onResult(null)
                 }
             }
@@ -123,45 +153,56 @@ class CameraController(
     // ---------------- VIDEO ----------------
 
     fun startRecording(onResult: (String?) -> Unit) {
-    val video = videoCapture ?: return
+        val video = videoCapture ?: run {
+            Log.e(TAG, "VideoCapture is null")
+            return
+        }
 
-    val fileName = "VID_${System.currentTimeMillis()}"
+        val fileName = "VID_${System.currentTimeMillis()}"
+        Log.d(TAG, "Starting video recording: $fileName")
 
-    val contentValues = ContentValues().apply {
-        put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
-        put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4")
-        put(MediaStore.Video.Media.RELATIVE_PATH, "Movies/Pixora")
-    }
+        val contentValues = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+            put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4")
+            put(MediaStore.Video.Media.RELATIVE_PATH, "Movies/Pixora")
+        }
 
-    val outputOptions = MediaStoreOutputOptions
-        .Builder(
-            context.contentResolver,
-            MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-        )
-        .setContentValues(contentValues)
-        .build()
+        val outputOptions = MediaStoreOutputOptions
+            .Builder(
+                context.contentResolver,
+                MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+            )
+            .setContentValues(contentValues)
+            .build()
 
-    activeRecording = video.output
-        .prepareRecording(context, outputOptions)
-        .withAudioEnabled()
-        .start(ContextCompat.getMainExecutor(context)) { event ->
+        activeRecording = video.output
+            .prepareRecording(context, outputOptions)
+            .withAudioEnabled()
+            .start(ContextCompat.getMainExecutor(context)) { event ->
 
-            when (event) {
-                is VideoRecordEvent.Start -> {
-                    // Recording started
-                }
+                when (event) {
+                    is VideoRecordEvent.Start -> {
+                        Log.d(TAG, "Video recording started")
+                    }
 
-                is VideoRecordEvent.Finalize -> {
-                    // ✅ VIDEO IS SAVED HERE
-                    onResult(event.outputResults.outputUri?.toString())
-                    activeRecording = null
+                    is VideoRecordEvent.Finalize -> {
+                        Log.d(
+                            TAG,
+                            "Video recording finalized. Saved URI: ${event.outputResults.outputUri}"
+                        )
+                        onResult(event.outputResults.outputUri?.toString())
+                        activeRecording = null
+                    }
                 }
             }
-        }
-}
-
+    }
 
     fun stopRecording() {
-        activeRecording?.stop()
+        if (activeRecording != null) {
+            Log.d(TAG, "Stopping video recording")
+            activeRecording?.stop()
+        } else {
+            Log.d(TAG, "No active recording to stop")
+        }
     }
 }
