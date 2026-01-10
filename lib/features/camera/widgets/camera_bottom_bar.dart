@@ -3,7 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:pixora/core/theme/app_colors.dart';
 import 'package:pixora/core/platform/camera_service.dart';
-import 'package:pixora/features/saved_images/view/saved_images_screen.dart';
+import 'package:pixora/features/gallery/view/gallery_screen.dart';
 import 'package:provider/provider.dart';
 import '../controller/camera_controller.dart';
 import 'camera_overlays.dart';

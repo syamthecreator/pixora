@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:pixora/features/saved_images/models/media_type.dart';
+import 'package:pixora/features/gallery/models/media_type.dart';
 import 'package:provider/provider.dart';
-import 'package:pixora/features/saved_images/controller/saved_images_controller.dart';
+import 'package:pixora/features/gallery/controller/gallery_controller.dart';
 
 class ImageViewerScreen extends StatelessWidget {
   final MediaItem mediaItem;
@@ -14,7 +14,7 @@ class ImageViewerScreen extends StatelessWidget {
 
   Future<void> _deleteMedia(
     BuildContext context,
-    SavedImagesController controller,
+    GalleryController controller,
     MediaItem item,
   ) async {
     if (controller.isDeleting) return;
@@ -49,7 +49,7 @@ class ImageViewerScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = context.watch<SavedImagesController>();
+    final controller = context.watch<GalleryController>();
 
     return Scaffold(
       backgroundColor: Colors.black,

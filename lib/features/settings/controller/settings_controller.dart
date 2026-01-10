@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pixora/features/camera/widgets/quick_settings_sheet.dart';
-import 'package:pixora/routes/app_routes.dart';
+import 'package:pixora/core/routes/app_routes.dart';
 
 /// Supported camera aspect ratios
 enum CameraRatio { oneOne, fourThree, sixteenNine, full }

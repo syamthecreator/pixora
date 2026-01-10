@@ -28,11 +28,11 @@ class _FilterCarousel extends StatelessWidget {
         controller: controller.filterPageController,
         clipBehavior: Clip.none,
         onPageChanged: controller.changeFilter,
-        itemCount: controller.filters.length,
+        itemCount: FilterModelList.filters.length,
         itemBuilder: (context, index) {
           return _FilterItem(
             index: index,
-            filter: controller.filters[index],
+            filter: FilterModelList.filters[index],
             isActive: index == controller.selectedFilter,
             controller: controller,
           );

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:pixora/features/saved_images/controller/saved_images_controller.dart';
-import 'package:pixora/features/saved_images/models/media_type.dart';
-import 'package:pixora/features/saved_images/widgets/video_playing_screen.dart';
-import 'package:pixora/features/saved_images/widgets/video_thumbnail.dart';
+import 'package:pixora/features/gallery/controller/gallery_controller.dart';
+import 'package:pixora/features/gallery/models/media_type.dart';
+import 'package:pixora/features/gallery/widgets/gallery_video_screen.dart';
+import 'package:pixora/features/gallery/widgets/gallery_video_thumbnail.dart';
 import 'package:provider/provider.dart';
-import '../widgets/image_viewer_screen.dart';
+import '../widgets/gallery_image_screen.dart';
 
 class SavedMediaScreen extends StatelessWidget {
   const SavedMediaScreen({super.key});
@@ -12,7 +12,7 @@ class SavedMediaScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => SavedImagesController()..loadMedia(),
+      create: (_) => GalleryController()..loadMedia(),
       child: const _SavedImagesView(),
     );
   }
@@ -23,7 +23,7 @@ class _SavedImagesView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = context.watch<SavedImagesController>();
+    final controller = context.watch<GalleryController>();
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -36,7 +36,7 @@ class _SavedImagesView extends StatelessWidget {
     );
   }
 
-  Widget _buildBody(BuildContext context, SavedImagesController controller) {
+  Widget _buildBody(BuildContext context, GalleryController controller) {
     if (controller.isLoading) {
       return const Center(
         child: CircularProgressIndicator(color: Colors.white),

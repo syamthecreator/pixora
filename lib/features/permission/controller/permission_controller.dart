@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:pixora/routes/app_routes.dart';
+import 'package:pixora/core/routes/app_routes.dart';
 
 class PermissionController extends ChangeNotifier with WidgetsBindingObserver {
   BuildContext? _context;

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pixora/core/theme/app_colors.dart';
 import '../model/welcome_content_model.dart';
 
 class WelcomeSwipeIndicator extends StatefulWidget {
@@ -18,33 +19,35 @@ class WelcomeSwipeIndicator extends StatefulWidget {
 }
 
 class _WelcomeSwipeIndicatorState extends State<WelcomeSwipeIndicator> {
+  // Constants
   static const double _maxDragDistance = 120.0;
   static const double _completionThreshold = 0.75;
+  static const double _arrowDelayFactor = 0.2;
 
   double _dragOffset = 0.0;
 
+  // ───────────────────────── Gestures ─────────────────────────
+
   void _onDragUpdate(DragUpdateDetails details) {
     setState(() {
-      // Right → Left swipe increases offset
-      _dragOffset =
-          (_dragOffset - details.delta.dx).clamp(0.0, _maxDragDistance);
+      _dragOffset = (_dragOffset - details.delta.dx).clamp(
+        0.0,
+        _maxDragDistance,
+      );
     });
   }
 
   void _onDragEnd(DragEndDetails details) {
-    final bool isComplete =
-        _dragOffset > _maxDragDistance * _completionThreshold;
+    final isComplete = _dragOffset > _maxDragDistance * _completionThreshold;
 
-    if (isComplete) {
-      widget.onCompleted();
-    } else {
-      _resetDragOffset();
-    }
+    isComplete ? widget.onCompleted() : _resetDragOffset();
   }
 
   void _resetDragOffset() {
     setState(() => _dragOffset = 0.0);
   }
+
+  // ───────────────────────── Build ─────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -61,41 +64,37 @@ class _WelcomeSwipeIndicatorState extends State<WelcomeSwipeIndicator> {
     );
   }
 
-  /// 🔥 TEXT + ARROWS IN SAME LINE
   Widget _buildSwipeRow() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
-      children: [
-        _buildSwipeText(),
-        const SizedBox(width: 8),
-        _buildArrowRow(),
-      ],
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [_buildSwipeText(), const SizedBox(width: 8), _buildArrowRow()],
     );
   }
+
+  // ───────────────────────── Text ─────────────────────────
 
   Widget _buildSwipeText() {
-    return FadeTransition(
-      opacity: _createTextOpacityAnimation(),
-      child: Text(
-        WelcomeContent.swipeText,
-        style: _textStyle,
-      ),
+    final dragProgress = (_dragOffset / _maxDragDistance).clamp(0.0, 1.0);
+
+    return Opacity(
+      opacity: 1.0 - dragProgress * 0.6,
+      child: Text(WelcomeContent.swipeText, style: _textStyle),
     );
   }
 
+  // ───────────────────────── Arrows ─────────────────────────
+
   Widget _buildArrowRow() {
-    return Row(
-      children: List.generate(3, _buildAnimatedArrow),
-    );
+    return Row(children: List.generate(3, _buildAnimatedArrow));
   }
 
   Widget _buildAnimatedArrow(int index) {
     return AnimatedBuilder(
       animation: widget.controller,
-      builder: (context, _) {
-        final opacity = _calculateArrowOpacity(index);
-        return _buildArrowIcon(opacity);
+      builder: (_, __) {
+        return _buildArrowIcon(_arrowOpacityFor(index));
       },
     );
   }
@@ -104,36 +103,30 @@ class _WelcomeSwipeIndicatorState extends State<WelcomeSwipeIndicator> {
     return Opacity(
       opacity: opacity,
       child: const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 2),
-        child: Icon(
-          Icons.arrow_back_ios,
-          size: 14,
-          color: Colors.white70,
-        ),
+        padding: EdgeInsets.symmetric(horizontal: 1),
+        child: Icon(Icons.arrow_back_ios, size: 18, color: AppColors.white),
       ),
     );
   }
 
-  // Animations
-  Animation<double> _createTextOpacityAnimation() {
-    return Tween<double>(begin: 0.35, end: 0.75).animate(
-      CurvedAnimation(
-        parent: widget.controller,
-        curve: Curves.easeInOut,
-      ),
-    );
-  }
-
-  double _calculateArrowOpacity(int index) {
-    const double delayFactor = 0.2;
-    final double delay = (2 - index) * delayFactor;
+  double _arrowOpacityFor(int index) {
+    final delay = (2 - index) * _arrowDelayFactor;
     return (widget.controller.value - delay).clamp(0.0, 1.0);
   }
 
-  // Styles
-  TextStyle get _textStyle => const TextStyle(
-        color: Colors.white,
-        fontSize: 14,
-        letterSpacing: 1,
-      );
+  // ───────────────────────── Styles ─────────────────────────
+
+  TextStyle get _textStyle => TextStyle(
+    color: AppColors.white.withValues(alpha: 0.85),
+    fontSize: 20,
+    height: 1.0,
+    letterSpacing: 1.2,
+    fontWeight: FontWeight.w600,
+    shadows: [
+      Shadow(
+        color: AppColors.neonPurple.withValues(alpha: 0.6),
+        blurRadius: 12,
+      ),
+    ],
+  );
 }

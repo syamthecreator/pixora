@@ -1,7 +1,7 @@
 import 'package:permission_handler/permission_handler.dart';
 
 /// Camera + Mic + Gallery permission
-Future<bool> checkCameraMicAndMediaPermission() async {
+Future<bool> checkCameraMicPermission() async {
   // ---------------- CAMERA & MIC ----------------
   final cameraStatus = await Permission.camera.status;
   final micStatus = await Permission.microphone.status;

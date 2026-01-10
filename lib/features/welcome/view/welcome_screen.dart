@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:pixora/core/theme/app_colors.dart';
 import 'package:pixora/features/welcome/controller/welcome_animation_controller.dart';
 import 'package:pixora/features/welcome/widgets/welcome_background.dart';
 import 'package:pixora/features/welcome/widgets/welcome_content.dart';
@@ -34,60 +35,106 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       body: GestureDetector(
-        onHorizontalDragEnd: (d) {
-          if (d.primaryVelocity != null && d.primaryVelocity! < -300) {
-            anim.continueFlowFromWelcome(context);
-          }
-        },
+        onHorizontalDragEnd: _handleSwipeEnd,
         child: Stack(
           fit: StackFit.expand,
           children: [
-            WelcomeBackground(fade: anim.fade, scale: anim.scale),
-            Container(color: Colors.black.withValues(alpha: 0.18)),
-            SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 20, 24, 40),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    WelcomeTopBar(fade: anim.fade),
-                    const Spacer(),
-                    WelcomeContentSection(
-                      fade: anim.fade,
-                      onTap: () => anim.continueFlowFromWelcome(context),
-                    ),
-                    const SizedBox(height: 20),
-
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(32),
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-                        child: Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(32),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.25),
-                            ),
-                          ),
-                          child: WelcomeSwipeIndicator(
-                            controller: anim.arrowController,
-                            arrowOpacity: anim.arrowOpacity,
-                            onCompleted: () =>
-                                anim.continueFlowFromWelcome(context),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            _buildBackground(),
+            _buildOverlayGradient(),
+            _buildForegroundContent(),
           ],
         ),
       ),
     );
   }
+
+  // ───────────────────────── Gesture ─────────────────────────
+
+  void _handleSwipeEnd(DragEndDetails details) {
+    if (details.primaryVelocity != null && details.primaryVelocity! < -300) {
+      anim.continueFlowFromWelcome(context);
+    }
+  }
+
+  // ───────────────────────── Layers ─────────────────────────
+
+  Widget _buildBackground() {
+    return WelcomeBackground(fade: anim.fade, scale: anim.scale);
+  }
+
+  Widget _buildOverlayGradient() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.black.withValues(alpha: 0.15),
+            Colors.black.withValues(alpha: 0.35),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildForegroundContent() {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 20, 24, 40),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            WelcomeTopBar(fade: anim.fade),
+            const Spacer(),
+            WelcomeContentSection(fade: anim.fade, onTap: _continueFlow),
+            const SizedBox(height: 20),
+            _buildSwipeGlassCard(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ───────────────────────── Glass Swipe ─────────────────────────
+
+  Widget _buildSwipeGlassCard() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(32),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          decoration: _glassDecoration,
+          child: WelcomeSwipeIndicator(
+            controller: anim.arrowController,
+            arrowOpacity: anim.arrowOpacity,
+            onCompleted: _continueFlow,
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ───────────────────────── Helpers ─────────────────────────
+
+  void _continueFlow() {
+    anim.continueFlowFromWelcome(context);
+  }
+
+  BoxDecoration get _glassDecoration => BoxDecoration(
+    color: AppColors.neonPurple.withValues(alpha: 0.10),
+    borderRadius: BorderRadius.circular(32),
+    border: Border.all(
+      color: AppColors.neonPurple.withValues(alpha: 0.35),
+      width: 1,
+    ),
+    boxShadow: [
+      BoxShadow(
+        color: AppColors.neonPurple.withValues(alpha: 0.18),
+        blurRadius: 24,
+        spreadRadius: 2,
+      ),
+    ],
+  );
 }

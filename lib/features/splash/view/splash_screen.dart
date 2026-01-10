@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pixora/core/constants/app_images.dart';
-import 'package:pixora/features/spash/models/splash_brand_model.dart';
-import 'package:pixora/features/spash/widgets/splash_text.dart';
+import 'package:pixora/features/splash/models/splash_brand_model.dart';
+import 'package:pixora/features/splash/widgets/splash_text.dart';
 
 import '../controller/splash_controller.dart';
 import '../widgets/splash_logo.dart';

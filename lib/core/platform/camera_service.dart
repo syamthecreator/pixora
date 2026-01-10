@@ -18,4 +18,5 @@ class CameraService {
   static Future<void> stopRecording() async {
     await _channel.invokeMethod('stopRecording');
   }
+  
 }

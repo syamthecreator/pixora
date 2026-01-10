@@ -7,7 +7,7 @@ import 'package:pixora/features/camera/widgets/camera_filter_bar.dart';
 import 'package:pixora/features/camera/widgets/camera_preview.dart';
 import 'package:pixora/features/camera/widgets/camera_top_bar.dart';
 import 'package:pixora/features/settings/controller/settings_controller.dart';
-import 'package:pixora/routes/app_routes.dart';
+import 'package:pixora/core/routes/app_routes.dart';
 import 'package:provider/provider.dart';
 
 class CameraScreen extends StatefulWidget {
@@ -38,7 +38,7 @@ class _CameraScreenState extends State<CameraScreen>
   }
 
   Future<void> _checkPermission() async {
-    final ok = await checkCameraMicAndMediaPermission();
+    final ok = await checkCameraMicPermission();
     if (!ok && mounted) {
       Navigator.pushReplacementNamed(context, AppRoutes.permission);
     }
@@ -47,7 +47,7 @@ class _CameraScreenState extends State<CameraScreen>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.resumed) {
-      final ok = await checkCameraMicAndMediaPermission();
+      final ok = await checkCameraMicPermission();
 
       if (!ok && mounted) {
         Navigator.pushReplacementNamed(context, AppRoutes.permission);

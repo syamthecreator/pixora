@@ -1,6 +1,6 @@
 import 'package:pixora/features/camera/controller/camera_controller.dart';
 import 'package:pixora/features/permission/controller/permission_controller.dart';
-import 'package:pixora/features/saved_images/controller/saved_images_controller.dart';
+import 'package:pixora/features/gallery/controller/gallery_controller.dart';
 import 'package:pixora/features/settings/controller/settings_controller.dart';
 import 'package:pixora/features/welcome/controller/welcome_controller.dart';
 import 'package:provider/provider.dart';
@@ -12,6 +12,6 @@ class AppProviderBinding {
     ChangeNotifierProvider(create: (_) => SettingsController()),
     ChangeNotifierProvider(create: (_) => WelcomeController()),
     ChangeNotifierProvider(create: (_) => PermissionController()),
-    ChangeNotifierProvider(create: (_) => SavedImagesController()),
+    ChangeNotifierProvider(create: (_) => GalleryController()),
   ];
 }

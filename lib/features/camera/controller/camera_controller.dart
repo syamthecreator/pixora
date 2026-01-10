@@ -3,14 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pixora/features/camera/models/camera_mode.dart';
 import 'package:pixora/core/platform/flash_service.dart' show FlashService;
-import '../../../core/constants/app_filters.dart';
 import '../models/filter_model.dart';
 
 /// Flash modes supported by the camera
 enum FlashModeX { off, on, auto }
 
 class CameraControllerX extends ChangeNotifier {
-  // -------------------- Filter Controller --------------------
   late final PageController filterPageController;
 
   // -------------------- Camera State --------------------
@@ -25,31 +23,6 @@ class CameraControllerX extends ChangeNotifier {
   Timer? _recordTimer;
   Duration recordingDuration = Duration.zero;
 
-  // -------------------- Filters --------------------
-  // final List<FilterModel> filters = [
-  //   FilterModel(name: "Moody", image: AppFilters.moody),
-  //   FilterModel(name: "Vintage", image: AppFilters.vintage),
-  //   FilterModel(name: "Natural", image: AppFilters.natural),
-  //   FilterModel(name: "Cinematic", image: AppFilters.cinematic),
-  //   FilterModel(name: "Vibrant", image: AppFilters.vibrant),
-  // ];
-
-  final List<FilterModel> filters = [
-    FilterModel(
-      key: "CINEMATIC",
-      name: "Cinematic",
-      image: AppFilters.cinematic,
-    ),
-    FilterModel(key: "WARM_GLOW", name: "Warm Glow", image: AppFilters.vintage),
-    FilterModel(key: "URBAN_POP", name: "Urban Pop", image: AppFilters.natural),
-    FilterModel(
-      key: "SOFT_FILM",
-      name: "Soft Film",
-      image: AppFilters.cinematic,
-    ),
-    FilterModel(key: "VIVID_POP", name: "Vivid Pop", image: AppFilters.moody),
-  ];
-
   CameraControllerX() {
     filterPageController = PageController(
       viewportFraction: 0.30,
@@ -61,10 +34,9 @@ class CameraControllerX extends ChangeNotifier {
   Future<void> changeFilter(int index) async {
     selectedFilter = index;
 
-    await const MethodChannel('pixora/camera').invokeMethod(
-      'setFilter',
-      {'filter': filters[index].key}, // 🔥 ENUM KEY
-    );
+    await const MethodChannel(
+      'pixora/camera',
+    ).invokeMethod('setFilter', {'filter': FilterModelList.filters[index].key});
 
     notifyListeners();
   }

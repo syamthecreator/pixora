@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:pixora/core/constants/app_native_side.dart';
 
 class CameraPreviewView extends StatelessWidget {
   const CameraPreviewView({super.key});
@@ -9,7 +10,7 @@ class CameraPreviewView extends StatelessWidget {
   Widget build(BuildContext context) {
     if (defaultTargetPlatform == TargetPlatform.android) {
       return const AndroidView(
-        viewType: 'pixora/camera_preview',
+        viewType: NativeSide.cameraPreview,
         layoutDirection: TextDirection.ltr,
         creationParamsCodec: StandardMessageCodec(),
       );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:pixora/core/theme/app_colors.dart';
 import 'package:pixora/features/permission/controller/permission_controller.dart';
 import 'package:provider/provider.dart';
 
@@ -45,7 +46,7 @@ class _PermissionDeniedScreenState extends State<PermissionDeniedScreen> {
               const Text(
                 "Permission request",
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppColors.white,
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                 ),
@@ -65,9 +66,9 @@ class _PermissionDeniedScreenState extends State<PermissionDeniedScreen> {
                       onPressed: () {
                         SystemNavigator.pop();
                       },
-                      child: const Text(
+                      child: Text(
                         "Cancel",
-                        style: TextStyle(color: Colors.amber),
+                        style: TextStyle(color: AppColors.kAccentYellow),
                       ),
                     ),
                   ),
@@ -76,9 +77,9 @@ class _PermissionDeniedScreenState extends State<PermissionDeniedScreen> {
                       onPressed: () async {
                         await openAppSettings();
                       },
-                      child: const Text(
+                      child: Text(
                         "Settings",
-                        style: TextStyle(color: Colors.amber),
+                        style: TextStyle(color: AppColors.kAccentYellow),
                       ),
                     ),
                   ),

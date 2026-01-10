@@ -1,15 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:pixora/core/constants/app_directory.dart';
 import 'package:pixora/core/platform/media_service.dart';
-import 'package:pixora/features/saved_images/models/media_type.dart';
+import 'package:pixora/features/gallery/models/media_type.dart';
 
-class SavedImagesController extends ChangeNotifier {
-  final Directory imageDir =
-      Directory('/storage/emulated/0/Pictures/Pixora');
-
-  final Directory videoDir =
-      Directory('/storage/emulated/0/Movies/Pixora');
-
+class GalleryController extends ChangeNotifier {
+  final Directory imageDir = Directory(DirectoryView.imageDir);
+  final Directory videoDir = Directory(DirectoryView.videoDir);
   final List<MediaItem> media = [];
 
   bool isLoading = false;
@@ -25,9 +22,7 @@ class SavedImagesController extends ChangeNotifier {
       final images = imageDir
           .listSync()
           .whereType<File>()
-          .where((f) =>
-              f.path.endsWith('.jpg') ||
-              f.path.endsWith('.png'))
+          .where((f) => f.path.endsWith('.jpg') || f.path.endsWith('.png'))
           .map((f) => MediaItem(file: f, type: MediaType.image));
       items.addAll(images);
     }
@@ -36,16 +31,14 @@ class SavedImagesController extends ChangeNotifier {
       final videos = videoDir
           .listSync()
           .whereType<File>()
-          .where((f) =>
-              f.path.endsWith('.mp4') ||
-              f.path.endsWith('.mov'))
+          .where((f) => f.path.endsWith('.mp4') || f.path.endsWith('.mov'))
           .map((f) => MediaItem(file: f, type: MediaType.video));
       items.addAll(videos);
     }
 
-    items.sort((a, b) =>
-        b.file.lastModifiedSync()
-            .compareTo(a.file.lastModifiedSync()));
+    items.sort(
+      (a, b) => b.file.lastModifiedSync().compareTo(a.file.lastModifiedSync()),
+    );
 
     media
       ..clear()
@@ -61,8 +54,7 @@ class SavedImagesController extends ChangeNotifier {
     isDeleting = true;
     notifyListeners();
 
-    final deleted =
-        await MediaDeleteService.deleteImage(item.file.path);
+    final deleted = await MediaDeleteService.deleteImage(item.file.path);
 
     if (deleted) {
       media.remove(item);

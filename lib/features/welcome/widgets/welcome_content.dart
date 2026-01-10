@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pixora/core/theme/app_colors.dart';
 import '../model/welcome_content_model.dart';
 
 class WelcomeContentSection extends StatelessWidget {
@@ -16,31 +17,34 @@ class WelcomeContentSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        FadeTransition(
-          opacity: fade,
-          child: Text(
-            WelcomeContent.title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 34,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
+        _fadeText(text: WelcomeContent.title, style: _titleStyle),
         const SizedBox(height: 12),
-        FadeTransition(
-          opacity: fade,
-          child: Text(
-            WelcomeContent.subtitle,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.75),
-              fontSize: 15,
-              height: 1.4,
-            ),
-          ),
-        ),
+        _fadeText(text: WelcomeContent.subtitle, style: _subtitleStyle),
         const SizedBox(height: 32),
       ],
     );
   }
+
+  // ───────────────────────── Helpers ─────────────────────────
+
+  Widget _fadeText({required String text, required TextStyle style}) {
+    return FadeTransition(
+      opacity: fade,
+      child: Text(text, style: style),
+    );
+  }
+
+  // ───────────────────────── Styles ─────────────────────────
+
+  TextStyle get _titleStyle => const TextStyle(
+    color: AppColors.white,
+    fontSize: 34,
+    fontWeight: FontWeight.w600,
+  );
+
+  TextStyle get _subtitleStyle => TextStyle(
+    color: AppColors.white.withValues(alpha: 0.7),
+    fontSize: 15,
+    height: 1.4,
+  );
 }

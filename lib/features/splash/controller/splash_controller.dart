@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:pixora/features/welcome/controller/welcome_controller.dart';
-import 'package:pixora/routes/app_routes.dart';
+import 'package:pixora/core/routes/app_routes.dart';
 import 'package:provider/provider.dart';
 
 /// Handles splash screen animations and navigation

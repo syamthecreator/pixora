@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pixora/features/camera/view/camera_screen.dart';
 import 'package:pixora/features/permission/view/permission_denied_screen.dart';
 import 'package:pixora/features/settings/view/settings_page.dart';
-import 'package:pixora/features/spash/view/splash_screen.dart';
+import 'package:pixora/features/splash/view/splash_screen.dart';
 import 'package:pixora/features/welcome/view/welcome_screen.dart';
 
 class AppRoutes {

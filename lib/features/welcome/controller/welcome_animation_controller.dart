@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pixora/core/utils/permission_handler.dart';
-import 'package:pixora/routes/app_routes.dart';
+import 'package:pixora/core/routes/app_routes.dart';
 import 'package:provider/provider.dart';
 import 'welcome_controller.dart';
 
@@ -42,7 +42,7 @@ class WelcomeAnimationController {
 
     if (!context.mounted) return;
 
-    final hasPermission = await checkCameraMicAndMediaPermission();
+    final hasPermission = await checkCameraMicPermission();
     if (!context.mounted) return;
 
     if (!hasPermission) {

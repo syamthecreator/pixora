@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 
-import 'package:pixora/features/saved_images/controller/saved_images_controller.dart';
-import 'package:pixora/features/saved_images/models/media_type.dart';
+import 'package:pixora/features/gallery/controller/gallery_controller.dart';
+import 'package:pixora/features/gallery/models/media_type.dart';
 
 class VideoPlayerScreen extends StatefulWidget {
   final MediaItem mediaItem;
@@ -56,7 +56,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   // ---------- DELETE (SAME AS IMAGE VIEWER) ----------
   Future<void> _deleteMedia(
     BuildContext context,
-    SavedImagesController controller,
+    GalleryController controller,
     MediaItem item,
   ) async {
     if (controller.isDeleting) return;
@@ -88,7 +88,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final savedController = context.watch<SavedImagesController>();
+    final savedController = context.watch<GalleryController>();
 
     return Scaffold(
       backgroundColor: Colors.black,
