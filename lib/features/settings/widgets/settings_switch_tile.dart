@@ -50,26 +50,36 @@ class SettingsSwitchTile extends StatelessWidget {
             value: value,
             onChanged: (v) => controller.toggle(settingKey, v),
 
-            /// Track
+            /// Track fill color
             trackColor: WidgetStateProperty.resolveWith((states) {
               if (states.contains(WidgetState.selected)) {
-                return AppColors.neonPurple; // dark gold track
+                return AppColors.neonPurple.withValues(alpha: 0.18);
               }
-              return const Color(0xFF2A2A2A); // dark grey
+              return AppColors.inactiveOption;
             }),
 
-            /// Border ring thumb
+            /// Track border
+            trackOutlineColor: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.selected)) {
+                return Colors.transparent;
+              }
+              return AppColors.inactiveOption;
+            }),
+
+            trackOutlineWidth: WidgetStateProperty.all(1.5),
+
+            /// Thumb color
             thumbColor: WidgetStateProperty.resolveWith((states) {
               if (states.contains(WidgetState.selected)) {
-                return AppColors.white; // gold ring
+                return AppColors.neonPurple;
               }
-              return const Color(0xFFB0B0B0); // grey ring
+              return Colors.white24;
             }),
 
-            /// Remove material ripple
+            /// Remove ripple
             overlayColor: WidgetStateProperty.all(Colors.transparent),
 
-            /// Size & shape
+            /// Compact size
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
         ],

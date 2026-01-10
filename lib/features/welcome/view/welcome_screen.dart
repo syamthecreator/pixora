@@ -35,7 +35,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       body: GestureDetector(
-        onHorizontalDragEnd: _handleSwipeEnd,
+        behavior: HitTestBehavior.translucent,
+        onHorizontalDragUpdate: anim.onDragUpdate,
+        onHorizontalDragEnd: (d) => anim.onDragEnd(d, context),
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -46,14 +48,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
         ),
       ),
     );
-  }
-
-  // ───────────────────────── Gesture ─────────────────────────
-
-  void _handleSwipeEnd(DragEndDetails details) {
-    if (details.primaryVelocity != null && details.primaryVelocity! < -300) {
-      anim.continueFlowFromWelcome(context);
-    }
   }
 
   // ───────────────────────── Layers ─────────────────────────
@@ -96,7 +90,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   }
 
   // ───────────────────────── Glass Swipe ─────────────────────────
-
   Widget _buildSwipeGlassCard() {
     return ClipRRect(
       borderRadius: BorderRadius.circular(32),
@@ -106,10 +99,15 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           decoration: _glassDecoration,
-          child: WelcomeSwipeIndicator(
-            controller: anim.arrowController,
-            arrowOpacity: anim.arrowOpacity,
-            onCompleted: _continueFlow,
+          child: AnimatedBuilder(
+            animation: anim,
+            builder: (_, _) {
+              return WelcomeSwipeIndicator(
+                dragOffset: anim.dragOffset,
+                controller: anim.arrowController,
+                arrowOpacity: anim.arrowOpacity,
+              );
+            },
           ),
         ),
       ),

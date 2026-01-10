@@ -95,6 +95,7 @@ class _RatioSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
+      
       listenable: controller,
       builder: (context, _) {
         return _SettingsOptionRow(
@@ -142,7 +143,7 @@ class _ToggleGridSection extends StatelessWidget {
               isActive: controller.gridLines,
               onTap: controller.toggleGridLines,
             ),
-    
+
             _ToggleTile(
               label: "Watermark",
               isActive: controller.watermark,
@@ -207,14 +208,16 @@ class _OptionTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          color: isActive ? AppColors.neonPurple: AppColors.inactiveOption,
+          color: isActive
+              ? AppColors.neonPurple.withValues(alpha: 0.18)
+              : AppColors.inactiveOption,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Center(
           child: Text(
             label,
             style: TextStyle(
-              color: isActive ? Colors.white : Colors.white,
+              color: isActive ? AppColors.neonPurple : Colors.white60,
               fontWeight: FontWeight.w600,
               fontSize: 14,
             ),
@@ -245,14 +248,16 @@ class _ToggleTile extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 14),
           decoration: BoxDecoration(
-            color: isActive ? AppColors.neonPurple: AppColors.inactiveOption,
+            color: isActive
+                ? AppColors.neonPurple.withValues(alpha: 0.18)
+                : AppColors.inactiveOption,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Center(
             child: Text(
               label,
               style: TextStyle(
-                color: isActive ? Colors.white : Colors.white,
+                color: isActive ? AppColors.neonPurple : Colors.white60,
                 fontWeight: FontWeight.w600,
                 fontSize: 14,
               ),

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:pixora/features/gallery/controller/gallery_controller.dart';
 import 'package:pixora/features/gallery/models/media_type.dart';
@@ -6,20 +7,20 @@ import 'package:pixora/features/gallery/widgets/gallery_video_thumbnail.dart';
 import 'package:provider/provider.dart';
 import '../widgets/gallery_image_screen.dart';
 
-class SavedMediaScreen extends StatelessWidget {
-  const SavedMediaScreen({super.key});
+class GalleryScreen extends StatelessWidget {
+  const GalleryScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => GalleryController()..loadMedia(),
-      child: const _SavedImagesView(),
+      child: const _GalleryView(),
     );
   }
 }
 
-class _SavedImagesView extends StatelessWidget {
-  const _SavedImagesView();
+class _GalleryView extends StatelessWidget {
+  const _GalleryView();
 
   @override
   Widget build(BuildContext context) {
@@ -27,12 +28,15 @@ class _SavedImagesView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: AppBar(
+      body: CupertinoPageScaffold(
         backgroundColor: Colors.black,
-        elevation: 0,
-        title: const Text('Gallery'),
+        navigationBar: const CupertinoNavigationBar(
+          backgroundColor: Colors.black,
+          middle: Text('Gallery', style: TextStyle(color: Colors.white)),
+          previousPageTitle: 'Back',
+        ),
+        child: SafeArea(child: _buildBody(context, controller)),
       ),
-      body: _buildBody(context, controller),
     );
   }
 
@@ -45,7 +49,10 @@ class _SavedImagesView extends StatelessWidget {
 
     if (controller.media.isEmpty) {
       return const Center(
-        child: Text('No images found', style: TextStyle(color: Colors.white70)),
+        child: Text(
+          'No images found',
+          style: TextStyle(color: Colors.white70, fontSize: 16),
+        ),
       );
     }
 
@@ -62,31 +69,19 @@ class _SavedImagesView extends StatelessWidget {
 
         return GestureDetector(
           onTap: () async {
-            if (item.type == MediaType.image) {
-              final deleted = await Navigator.push<bool>(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => ImageViewerScreen(mediaItem: item),
-                ),
-              );
+            final deleted = await Navigator.push<bool>(
+              context,
+              CupertinoPageRoute(
+                builder: (_) => item.type == MediaType.image
+                    ? GalleryImageScreen(mediaItem: item)
+                    : GalleryVideoScreen(mediaItem: item),
+              ),
+            );
 
-              if (deleted == true) {
-                controller.loadMedia();
-              }
-            } else {
-              final deleted = await Navigator.push<bool>(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => VideoPlayerScreen(mediaItem: item),
-                ),
-              );
-
-              if (deleted == true) {
-                controller.loadMedia();
-              }
+            if (deleted == true) {
+              controller.loadMedia();
             }
           },
-
           child: _MediaTile(item: item),
         );
       },
@@ -106,8 +101,7 @@ class _MediaTile extends StatelessWidget {
       children: [
         item.type == MediaType.image
             ? Image.file(item.file, fit: BoxFit.cover)
-            :
-             VideoThumbnail(file: item.file),
+            : GalleryVideoThumbnail(file: item.file),
 
         if (item.type == MediaType.video)
           const Center(

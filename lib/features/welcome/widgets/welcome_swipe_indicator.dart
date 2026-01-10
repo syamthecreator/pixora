@@ -2,67 +2,33 @@ import 'package:flutter/material.dart';
 import 'package:pixora/core/theme/app_colors.dart';
 import '../model/welcome_content_model.dart';
 
-class WelcomeSwipeIndicator extends StatefulWidget {
+class WelcomeSwipeIndicator extends StatelessWidget {
+  final double dragOffset;
   final AnimationController controller;
   final Animation<double> arrowOpacity;
-  final VoidCallback onCompleted;
+
+  static const double _maxDragDistance = 120.0;
+  static const double _arrowDelayFactor = 0.2;
 
   const WelcomeSwipeIndicator({
     super.key,
+    required this.dragOffset,
     required this.controller,
     required this.arrowOpacity,
-    required this.onCompleted,
   });
-
-  @override
-  State<WelcomeSwipeIndicator> createState() => _WelcomeSwipeIndicatorState();
-}
-
-class _WelcomeSwipeIndicatorState extends State<WelcomeSwipeIndicator> {
-  // Constants
-  static const double _maxDragDistance = 120.0;
-  static const double _completionThreshold = 0.75;
-  static const double _arrowDelayFactor = 0.2;
-
-  double _dragOffset = 0.0;
-
-  // ───────────────────────── Gestures ─────────────────────────
-
-  void _onDragUpdate(DragUpdateDetails details) {
-    setState(() {
-      _dragOffset = (_dragOffset - details.delta.dx).clamp(
-        0.0,
-        _maxDragDistance,
-      );
-    });
-  }
-
-  void _onDragEnd(DragEndDetails details) {
-    final isComplete = _dragOffset > _maxDragDistance * _completionThreshold;
-
-    isComplete ? widget.onCompleted() : _resetDragOffset();
-  }
-
-  void _resetDragOffset() {
-    setState(() => _dragOffset = 0.0);
-  }
-
-  // ───────────────────────── Build ─────────────────────────
 
   @override
   Widget build(BuildContext context) {
     return FadeTransition(
-      opacity: widget.arrowOpacity,
-      child: GestureDetector(
-        onHorizontalDragUpdate: _onDragUpdate,
-        onHorizontalDragEnd: _onDragEnd,
-        child: Transform.translate(
-          offset: Offset(-_dragOffset, 0),
-          child: _buildSwipeRow(),
-        ),
+      opacity: arrowOpacity,
+      child: Transform.translate(
+        offset: Offset(-dragOffset, 0),
+        child: _buildSwipeRow(),
       ),
     );
   }
+
+  // ───────────────────────── Layout ─────────────────────────
 
   Widget _buildSwipeRow() {
     return Row(
@@ -76,7 +42,7 @@ class _WelcomeSwipeIndicatorState extends State<WelcomeSwipeIndicator> {
   // ───────────────────────── Text ─────────────────────────
 
   Widget _buildSwipeText() {
-    final dragProgress = (_dragOffset / _maxDragDistance).clamp(0.0, 1.0);
+    final dragProgress = (dragOffset / _maxDragDistance).clamp(0.0, 1.0);
 
     return Opacity(
       opacity: 1.0 - dragProgress * 0.6,
@@ -92,8 +58,8 @@ class _WelcomeSwipeIndicatorState extends State<WelcomeSwipeIndicator> {
 
   Widget _buildAnimatedArrow(int index) {
     return AnimatedBuilder(
-      animation: widget.controller,
-      builder: (_, __) {
+      animation: controller,
+      builder: (_, _) {
         return _buildArrowIcon(_arrowOpacityFor(index));
       },
     );
@@ -111,7 +77,7 @@ class _WelcomeSwipeIndicatorState extends State<WelcomeSwipeIndicator> {
 
   double _arrowOpacityFor(int index) {
     final delay = (2 - index) * _arrowDelayFactor;
-    return (widget.controller.value - delay).clamp(0.0, 1.0);
+    return (controller.value - delay).clamp(0.0, 1.0);
   }
 
   // ───────────────────────── Styles ─────────────────────────

@@ -1,51 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:pixora/features/gallery/models/media_type.dart';
+import 'package:pixora/features/gallery/widgets/delete_fab.dart';
+import 'package:pixora/features/gallery/widgets/gallery_delete_helper.dart';
 import 'package:provider/provider.dart';
+import 'package:pixora/core/theme/app_colors.dart';
 import 'package:pixora/features/gallery/controller/gallery_controller.dart';
+import 'package:pixora/features/gallery/models/media_type.dart';
 
-class ImageViewerScreen extends StatelessWidget {
+class GalleryImageScreen extends StatelessWidget {
   final MediaItem mediaItem;
 
-  const ImageViewerScreen({
-    super.key,
-    required this.mediaItem,
-  });
-
-  Future<void> _deleteMedia(
-    BuildContext context,
-    GalleryController controller,
-    MediaItem item,
-  ) async {
-    if (controller.isDeleting) return;
-
-    // 🔔 Haptic feedback
-    HapticFeedback.mediumImpact();
-
-    final bool deleted = await controller.deleteMedia(item);
-
-    if (!context.mounted) return;
-
-    if (deleted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            item.type == MediaType.image ? 'Image deleted' : 'Video deleted',
-          ),
-          duration: const Duration(seconds: 2),
-        ),
-      );
-
-      Navigator.pop(context, true);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Delete cancelled'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
-  }
+  const GalleryImageScreen({super.key, required this.mediaItem});
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +17,6 @@ class ImageViewerScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: AppBar(backgroundColor: Colors.black, elevation: 0),
       body: Stack(
         children: [
           Center(
@@ -64,29 +27,14 @@ class ImageViewerScreen extends StatelessWidget {
             ),
           ),
 
-          Positioned(
-            bottom: 30,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: FloatingActionButton(
-                backgroundColor: controller.isDeleting
-                    ? Colors.grey
-                    : Colors.red,
-                onPressed: controller.isDeleting
-                    ? null
-                    : () => _deleteMedia(context, controller, mediaItem),
-                child: controller.isDeleting
-                    ? const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Icon(Icons.delete),
-              ),
+          DeleteFab(
+            isDeleting: controller.isDeleting,
+            color: AppColors.neonPurple,
+            onPressed: () => GalleryDeleteHelper.delete(
+              context: context,
+              controller: controller,
+              item: mediaItem,
+              snackbarColor: AppColors.neonPurple,
             ),
           ),
         ],

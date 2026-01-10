@@ -48,7 +48,7 @@ class _GalleryButton extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => const SavedMediaScreen(),
+            builder: (_) => const GalleryScreen(),
           ),
         );
       },

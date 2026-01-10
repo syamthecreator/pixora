@@ -100,7 +100,7 @@ class _FilterImage extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
-              color: isActive ? AppColors.neonPurple : Colors.white24,
+              color: isActive ? AppColors.neonPurple.withValues(alpha: 0.18): Colors.white24,
               width: 2,
             ),
           ),
