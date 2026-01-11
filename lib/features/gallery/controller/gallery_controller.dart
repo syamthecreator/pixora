@@ -17,6 +17,9 @@ class GalleryController extends ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get isDeleting => _isDeleting;
 
+  bool _isVideoPlaying = true;
+  bool get isVideoPlaying => _isVideoPlaying;
+
   // 🔥 REAL MEDIA LOADER
   Future<void> loadMedia() async {
     _isLoading = true;
@@ -142,9 +145,6 @@ class GalleryController extends ChangeNotifier {
     debugPrint('➡️ [Gallery] Showing next item at same index: $currentIndex');
     return currentIndex;
   }
-
-  bool _isVideoPlaying = true; // 🔥 NEW
-  bool get isVideoPlaying => _isVideoPlaying;
 
   // ▶️ Toggle play / pause
   void toggleVideoPlayback() {
