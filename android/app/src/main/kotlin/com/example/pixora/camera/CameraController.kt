@@ -24,7 +24,9 @@ class CameraController(
 
  {
 
-    private val TAG = "PixoraCamera"
+    companion object {
+        private const val TAG = "PixoraCamera"
+    }
 
     private var lensFacing = CameraSelector.LENS_FACING_BACK
 
@@ -62,9 +64,15 @@ class CameraController(
             ContextCompat.getMainExecutor(context)
         ) { imageProxy ->
             try {
-               val bitmap = imageProxy.toBitmap()
-                val rotatedBitmap = bitmap.rotate(imageProxy.imageInfo.rotationDegrees)
-                gpuImageView.setImage(rotatedBitmap)
+    val bitmap = imageProxy.toBitmap()
+
+val finalBitmap = bitmap.rotateAndMirror(
+    rotationDegrees = imageProxy.imageInfo.rotationDegrees,
+    isFrontCamera = lensFacing == CameraSelector.LENS_FACING_FRONT
+)
+
+gpuImageView.setImage(finalBitmap)
+
 
             } catch (e: Exception) {
                 Log.e(TAG, "Live filter error", e)
@@ -75,9 +83,11 @@ class CameraController(
 
         // -------- PHOTO --------
         imageCapture = ImageCapture.Builder()
-            .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
-            .setFlashMode(ImageCapture.FLASH_MODE_OFF)
-            .build()
+        .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+        .setFlashMode(ImageCapture.FLASH_MODE_OFF)
+        .setTargetRotation(gpuImageView.display.rotation) // 🔥 IMPORTANT
+        .build()
+
 
         // -------- VIDEO --------
         val recorder = Recorder.Builder()
@@ -176,44 +186,54 @@ class CameraController(
     // ---------------- PHOTO (UNCHANGED) ----------------
 
     fun takePhoto(
-        flashMode: String,
-        onResult: (String?) -> Unit
-    ) {
-        Log.d(TAG, "takePhoto() called with flashMode=$flashMode")
+    flashMode: String,
+    onResult: (String?) -> Unit
+) {
+    Log.d(TAG, "takePhoto() called with flashMode=$flashMode")
 
-        val capture = imageCapture ?: return
+    val capture = imageCapture ?: return
 
-        val fileName = "IMG_${System.currentTimeMillis()}"
+    // 🔥 THIS IS THE IMPORTANT LINE
+    capture.targetRotation = gpuImageView.display.rotation
 
-        val contentValues = ContentValues().apply {
-            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
-            put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-            put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/Pixora")
+    val fileName = "IMG_${System.currentTimeMillis()}"
+
+    val contentValues = ContentValues().apply {
+        put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+        put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+        put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/Pixora")
+    }
+
+    val outputOptions = ImageCapture.OutputFileOptions.Builder(
+        this.context.contentResolver,
+        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+        contentValues
+    ).build()
+
+    capture.takePicture(
+        outputOptions,
+        ContextCompat.getMainExecutor(context),
+        object : ImageCapture.OnImageSavedCallback {
+
+            override fun onImageSaved(result: ImageCapture.OutputFileResults) {
+            val uri = result.savedUri
+            Log.d(TAG, "Photo saved: $uri")
+
+            if (lensFacing == CameraSelector.LENS_FACING_FRONT && uri != null) {
+                mirrorSavedImage(uri)
+            }
+
+            onResult(uri?.toString())
         }
 
-        val outputOptions = ImageCapture.OutputFileOptions.Builder(
-            context.contentResolver,
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-            contentValues
-        ).build()
-
-        capture.takePicture(
-            outputOptions,
-            ContextCompat.getMainExecutor(context),
-            object : ImageCapture.OnImageSavedCallback {
-
-                override fun onImageSaved(result: ImageCapture.OutputFileResults) {
-                    Log.d(TAG, "Photo saved successfully: ${result.savedUri}")
-                    onResult(result.savedUri?.toString())
-                }
-
-                override fun onError(exception: ImageCaptureException) {
-                    Log.e(TAG, "Photo capture failed", exception)
-                    onResult(null)
-                }
+            override fun onError(exception: ImageCaptureException) {
+                Log.e(TAG, "Photo capture failed", exception)
+                onResult(null)
             }
-        )
-    }
+        }
+    )
+}
+
 
     // ---------------- VIDEO (UNCHANGED) ----------------
 
@@ -231,7 +251,7 @@ class CameraController(
         }
 
         val outputOptions = MediaStoreOutputOptions.Builder(
-            context.contentResolver,
+            this.context.contentResolver,
             MediaStore.Video.Media.EXTERNAL_CONTENT_URI
         ).setContentValues(contentValues).build()
 
@@ -251,6 +271,55 @@ class CameraController(
             }
     }
 
+        private fun mirrorSavedImage(uri: android.net.Uri) {
+    try {
+        val inputStream =
+            context.contentResolver.openInputStream(uri)
+
+        val bitmap = BitmapFactory.decodeStream(inputStream)
+        inputStream?.close()
+
+        if (bitmap == null) {
+            Log.e(TAG, "Bitmap decode failed")
+            return
+        }
+
+        val matrix = Matrix().apply {
+            postScale(
+                -1f,
+                1f,
+                bitmap.width / 2f,
+                bitmap.height / 2f
+            )
+        }
+
+        val mirroredBitmap = Bitmap.createBitmap(
+            bitmap,
+            0,
+            0,
+            bitmap.width,
+            bitmap.height,
+            matrix,
+            true
+        )
+
+        context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+            mirroredBitmap.compress(
+                Bitmap.CompressFormat.JPEG,
+                95,
+                outputStream
+            )
+        }
+
+        Log.d(TAG, "Front camera image mirrored successfully")
+
+    } catch (e: Exception) {
+        Log.e(TAG, "Failed to mirror saved image", e)
+    }
+}
+
+
+
     fun stopRecording() {
         activeRecording?.stop()
         activeRecording = null
@@ -258,7 +327,6 @@ class CameraController(
 }
 
 // ---------------- IMAGE EXTENSION ----------------
-
 private fun ImageProxy.toBitmap(): Bitmap {
     val yBuffer = planes[0].buffer
     val uBuffer = planes[1].buffer
@@ -285,20 +353,49 @@ private fun ImageProxy.toBitmap(): Bitmap {
     val out = ByteArrayOutputStream()
     yuvImage.compressToJpeg(Rect(0, 0, width, height), 90, out)
 
-    val bitmap = BitmapFactory.decodeByteArray(
+    return BitmapFactory.decodeByteArray(
         out.toByteArray(),
         0,
         out.size()
     )
-
-    return bitmap.rotate(imageInfo.rotationDegrees)
 }
+
 
 private fun Bitmap.rotate(degrees: Int): Bitmap {
     if (degrees == 0) return this
 
     val matrix = Matrix().apply {
         postRotate(degrees.toFloat())
+    }
+
+    return Bitmap.createBitmap(
+        this,
+        0,
+        0,
+        width,
+        height,
+        matrix,
+        true
+    )
+}
+
+private fun Bitmap.rotateAndMirror(
+    rotationDegrees: Int,
+    isFrontCamera: Boolean
+): Bitmap {
+    val matrix = Matrix()
+
+    // Rotate first
+    matrix.postRotate(rotationDegrees.toFloat())
+
+    // Mirror ONLY for front camera
+    if (isFrontCamera) {
+        matrix.postScale(
+            -1f,
+            1f,
+            width / 2f,
+            height / 2f
+        )
     }
 
     return Bitmap.createBitmap(
