@@ -20,13 +20,12 @@ class DeleteFab extends StatelessWidget {
       right: 0,
       child: Center(
         child: FloatingActionButton(
-          backgroundColor: color.withValues(alpha: 0.18),
+          backgroundColor: color.withValues(alpha: 0.25),
           onPressed: isDeleting ? null : onPressed,
           child: isDeleting
-              ? const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+              ? const CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation(Colors.red),
                 )
               : Icon(Icons.delete, color: color),
         ),

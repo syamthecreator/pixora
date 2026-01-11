@@ -60,7 +60,7 @@ class _CameraScreenState extends State<CameraScreen>
     final settings = context.watch<SettingsController>();
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.black,
       body: Stack(
         children: [
           // 🔥 CAMERA BACKGROUND

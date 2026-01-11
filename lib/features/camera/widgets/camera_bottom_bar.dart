@@ -3,7 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:pixora/core/theme/app_colors.dart';
 import 'package:pixora/core/platform/camera_service.dart';
-import 'package:pixora/features/gallery/view/gallery_screen.dart';
+import 'package:pixora/features/gallery/view/gallery_grid_screen.dart';
 import 'package:provider/provider.dart';
 import '../controller/camera_controller.dart';
 import 'camera_overlays.dart';
@@ -47,19 +47,13 @@ class _GalleryButton extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (_) => const GalleryScreen(),
-          ),
+          MaterialPageRoute(builder: (_) => const GalleryGridScreen()),
         );
       },
-      child: CameraOverlayWidget.glassIcon(
-        icon: Icons.photo_library,
-        size: 20,
-      ),
+      child: CameraOverlayWidget.glassIcon(icon: Icons.photo_library, size: 20),
     );
   }
 }
-
 
 class _FlipCameraButton extends StatelessWidget {
   const _FlipCameraButton();
@@ -235,7 +229,7 @@ class _MiddleRing extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
-          color: isPhoto ? AppColors.neonPurple: Colors.black,
+          color: isPhoto ? AppColors.neonPurple : Colors.black,
           width: 3,
         ),
       ),
