@@ -40,8 +40,7 @@ class GalleryController extends ChangeNotifier {
       final imageDir = Directory(DirectoryView.imageDir);
       if (await imageDir.exists()) {
         await for (final entity in imageDir.list(followLinks: false)) {
-          if (entity is File &&
-              _isImage(entity.path)) {
+          if (entity is File && _isImage(entity.path)) {
             final stat = await entity.stat();
             temp.add(
               _MediaWithTime(
@@ -57,8 +56,7 @@ class GalleryController extends ChangeNotifier {
       final videoDir = Directory(DirectoryView.videoDir);
       if (await videoDir.exists()) {
         await for (final entity in videoDir.list(followLinks: false)) {
-          if (entity is File &&
-              _isVideo(entity.path)) {
+          if (entity is File && _isVideo(entity.path)) {
             final stat = await entity.stat();
             temp.add(
               _MediaWithTime(
@@ -74,7 +72,6 @@ class GalleryController extends ChangeNotifier {
       temp.sort((a, b) => b.time.compareTo(a.time));
 
       _media.addAll(temp.map((e) => e.item));
-
     } catch (e) {
       debugPrint('❌ Gallery load error: $e');
     }
@@ -169,8 +166,5 @@ class _MediaWithTime {
   final MediaItem item;
   final DateTime time;
 
-  _MediaWithTime({
-    required this.item,
-    required this.time,
-  });
+  _MediaWithTime({required this.item, required this.time});
 }
