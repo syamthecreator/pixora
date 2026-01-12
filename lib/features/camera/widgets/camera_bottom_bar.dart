@@ -1,9 +1,9 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:pixora/core/theme/app_colors.dart';
 import 'package:pixora/core/platform/camera_service.dart';
 import 'package:pixora/features/camera/widgets/camera_blink_overlays.dart';
+import 'package:pixora/features/gallery/controller/gallery_controller.dart';
 import 'package:pixora/features/gallery/view/gallery_grid_screen.dart';
 import 'package:provider/provider.dart';
 import '../controller/camera_controller.dart';
@@ -148,7 +148,7 @@ class _CaptureButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => _handleTap(),
+      onTap: () => _handleTap(context),
       onLongPressEnd: (_) => _handleStop(),
       child: const SizedBox(
         width: 90,
@@ -162,26 +162,45 @@ class _CaptureButton extends StatelessWidget {
   }
 
   // ---------------- TAP ----------------
+  Future<void> _handleTap(BuildContext context) async {
+    log("📸 TAP: Capture button pressed");
 
-  Future<void> _handleTap() async {
     if (controller.isPhotoMode) {
-      // 🔥 BLINK EFFECT
       CameraFlashOverlay.blink();
+
       final uri = await CameraService.takePhoto(controller.flashMode.name);
-      if (uri != null) {
-        log("Photo saved: $uri");
+
+      log("📸 takePhoto() returned: $uri");
+
+      if (uri != null && context.mounted) {
+        _refreshGallery(context, newUri: uri);
       }
       return;
     }
+
     // ---------- START VIDEO ----------
     if (!controller.isRecording) {
+      log("🎥 START recording");
       controller.startRecording();
-      // 🔑 DO NOT await
       _videoSaveFuture = CameraService.startRecording();
       return;
     }
+
     // ---------- STOP VIDEO ----------
+    log("🎥 STOP recording");
     await _handleStop();
+  }
+
+  void _refreshGallery(BuildContext context, {required String newUri}) {
+    try {
+      final gallery = context.read<GalleryController>();
+
+      log("🔄 Gallery refresh requested with new URI");
+
+      gallery.loadMedia(); // full reload (safe)
+    } catch (e) {
+      log("⚠️ Gallery not in tree: $e");
+    }
   }
 
   // ---------------- STOP (tap OR long-press) ----------------

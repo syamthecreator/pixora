@@ -46,7 +46,9 @@ class _GalleryGridView extends StatelessWidget {
       ),
 
       body: controller.isLoading
-          ? const Center(child: CircularProgressIndicator(color: Colors.white))
+          ? Center(
+              child: CircularProgressIndicator(color: AppColors.neonPurple),
+            )
           : controller.media.isEmpty
           ? const _EmptyGallery()
           : Padding(

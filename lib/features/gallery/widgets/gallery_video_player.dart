@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:pixora/core/theme/app_colors.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 import '../controller/gallery_controller.dart';
@@ -64,8 +65,10 @@ class _GalleryVideoPlayerState extends State<GalleryVideoPlayer> {
     final galleryController = context.watch<GalleryController>();
 
     if (!_controller.value.isInitialized) {
-      return const Center(
-        child: CircularProgressIndicator(color: Colors.white),
+      return Center(
+        child: CircularProgressIndicator(
+          color: AppColors.neonPurple,
+        ),
       );
     }
 

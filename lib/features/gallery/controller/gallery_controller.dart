@@ -25,60 +25,76 @@ class GalleryController extends ChangeNotifier {
   // 🚀 FAST ASYNC MEDIA LOADER (NO UI BLOCKING)
   // ==========================================================
 
-  Future<void> loadMedia() async {
-    if (_isLoading) return;
+ Future<void> loadMedia() async {
+  if (_isLoading) {
+    debugPrint("⏸️ Gallery already loading, skipping");
+    return;
+  }
 
-    _isLoading = true;
-    notifyListeners();
+  debugPrint("🔄 Gallery load started");
 
-    _media.clear();
+  _isLoading = true;
+  notifyListeners();
 
-    try {
-      final List<_MediaWithTime> temp = [];
+  _media.clear();
 
-      // 📸 IMAGES
-      final imageDir = Directory(DirectoryView.imageDir);
-      if (await imageDir.exists()) {
-        await for (final entity in imageDir.list(followLinks: false)) {
-          if (entity is File && _isImage(entity.path)) {
-            final stat = await entity.stat();
-            temp.add(
-              _MediaWithTime(
-                item: MediaItem(file: entity, type: MediaType.image),
-                time: stat.modified,
-              ),
-            );
-          }
+  try {
+    final List<_MediaWithTime> temp = [];
+
+    // 📸 IMAGES
+    final imageDir = Directory(DirectoryView.imageDir);
+    debugPrint("📂 Checking image dir: ${imageDir.path}");
+
+    if (await imageDir.exists()) {
+      await for (final entity in imageDir.list(followLinks: false)) {
+        if (entity is File && _isImage(entity.path)) {
+          final stat = await entity.stat();
+
+          debugPrint("🖼️ Found image: ${entity.path}");
+
+          temp.add(
+            _MediaWithTime(
+              item: MediaItem(file: entity, type: MediaType.image),
+              time: stat.modified,
+            ),
+          );
         }
       }
-
-      // 🎥 VIDEOS
-      final videoDir = Directory(DirectoryView.videoDir);
-      if (await videoDir.exists()) {
-        await for (final entity in videoDir.list(followLinks: false)) {
-          if (entity is File && _isVideo(entity.path)) {
-            final stat = await entity.stat();
-            temp.add(
-              _MediaWithTime(
-                item: MediaItem(file: entity, type: MediaType.video),
-                time: stat.modified,
-              ),
-            );
-          }
-        }
-      }
-
-      // 🔽 SORT (LATEST FIRST)
-      temp.sort((a, b) => b.time.compareTo(a.time));
-
-      _media.addAll(temp.map((e) => e.item));
-    } catch (e) {
-      debugPrint('❌ Gallery load error: $e');
     }
 
-    _isLoading = false;
-    notifyListeners();
+    // 🎥 VIDEOS
+    final videoDir = Directory(DirectoryView.videoDir);
+    debugPrint("📂 Checking video dir: ${videoDir.path}");
+
+    if (await videoDir.exists()) {
+      await for (final entity in videoDir.list(followLinks: false)) {
+        if (entity is File && _isVideo(entity.path)) {
+          final stat = await entity.stat();
+
+          debugPrint("🎞️ Found video: ${entity.path}");
+
+          temp.add(
+            _MediaWithTime(
+              item: MediaItem(file: entity, type: MediaType.video),
+              time: stat.modified,
+            ),
+          );
+        }
+      }
+    }
+
+    temp.sort((a, b) => b.time.compareTo(a.time));
+    _media.addAll(temp.map((e) => e.item));
+
+    debugPrint("✅ Gallery load complete, items=${_media.length}");
+  } catch (e) {
+    debugPrint('❌ Gallery load error: $e');
   }
+
+  _isLoading = false;
+  notifyListeners();
+}
+
 
   // ==========================================================
   // 🗑️ DELETE
