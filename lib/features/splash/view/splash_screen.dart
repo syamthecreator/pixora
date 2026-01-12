@@ -21,7 +21,7 @@ class _SplashScreenState extends State<SplashScreen>
   final brand = const SplashBrandModel(
     title: 'PIXORA',
     subtitle: 'Create. Capture. Inspire.',
-    logoUrl: AppImages.logo,
+    logoUrl: AppImages.splashIcon,
   );
 
   @override
