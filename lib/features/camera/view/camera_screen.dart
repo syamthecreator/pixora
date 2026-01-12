@@ -19,14 +19,17 @@ class CameraScreen extends StatefulWidget {
 
 class _CameraScreenState extends State<CameraScreen>
     with WidgetsBindingObserver {
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+
     _checkPermission();
 
-    // ✅ MARK CAMERA READY AFTER FIRST FRAME
+    /// 🔥 Camera becomes ready AFTER first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       context.read<CameraControllerX>().isCameraReady = true;
     });
   }
@@ -34,6 +37,10 @@ class _CameraScreenState extends State<CameraScreen>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+
+    /// 🔴 Ensure camera is disposed when screen is destroyed
+    context.read<CameraControllerX>().disposeCamera();
+
     super.dispose();
   }
 
@@ -44,14 +51,27 @@ class _CameraScreenState extends State<CameraScreen>
     }
   }
 
+  /// ✅ THIS IS THE MOST IMPORTANT FIX
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
+    final camera = context.read<CameraControllerX>();
+
+    if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused) {
+      // 🔴 App going background → RELEASE CAMERA
+      camera.disposeCamera();
+    }
+
     if (state == AppLifecycleState.resumed) {
       final ok = await checkCameraMicPermission();
 
       if (!ok && mounted) {
         Navigator.pushReplacementNamed(context, AppRoutes.permission);
+        return;
       }
+
+      // 🟢 App back → RESTART CAMERA (forces AndroidView rebuild)
+      camera.restartCamera();
     }
   }
 
@@ -63,8 +83,10 @@ class _CameraScreenState extends State<CameraScreen>
       backgroundColor: AppColors.black,
       body: Stack(
         children: [
-          // 🔥 CAMERA BACKGROUND
-          const Positioned.fill(child: CameraPreviewView()),
+          // 🔥 CAMERA PREVIEW
+          const Positioned.fill(
+            child: CameraPreviewView(),
+          ),
 
           // 🔝 TOP BAR
           SafeArea(
@@ -72,7 +94,8 @@ class _CameraScreenState extends State<CameraScreen>
             child: Align(
               alignment: Alignment.topCenter,
               child: CameraTopBar(
-                onTapSettingsIcon: () => settings.showQuickSettings(context),
+                onTapSettingsIcon: () =>
+                    settings.showQuickSettings(context),
               ),
             ),
           ),
@@ -89,10 +112,11 @@ class _CameraScreenState extends State<CameraScreen>
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
-              padding: EdgeInsets.all(10),
+              padding: const EdgeInsets.all(10),
               decoration: const BoxDecoration(
                 color: AppColors.black,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                borderRadius:
+                    BorderRadius.vertical(top: Radius.circular(28)),
               ),
               child: const CameraBottomBar(),
             ),

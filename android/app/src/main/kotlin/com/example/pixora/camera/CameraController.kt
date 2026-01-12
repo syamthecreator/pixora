@@ -9,20 +9,18 @@ import android.util.Log
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.video.*
-import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import jp.co.cyberagent.android.gpuimage.GPUImage
 import jp.co.cyberagent.android.gpuimage.GPUImageView
 import java.io.ByteArrayOutputStream
-import java.io.InputStream
+import android.view.Surface
+
 
 class CameraController(
     private val context: Context,
     private val gpuImageView: GPUImageView
-)
-
- {
+) {
 
     companion object {
         private const val TAG = "PixoraCamera"
@@ -41,104 +39,114 @@ class CameraController(
     // 🔑 REQUIRED for torch control
     private var camera: Camera? = null
 
+    // 🔥 CRITICAL: store provider & analysis
+    private var cameraProvider: ProcessCameraProvider? = null
+    private var imageAnalysis: ImageAnalysis? = null
+
     // ---------------- CAMERA START ----------------
 
-   fun startCamera(lifecycleOwner: LifecycleOwner) {
-    Log.d(TAG, "startCamera() called")
+    fun startCamera(lifecycleOwner: LifecycleOwner) {
+        Log.d(TAG, "startCamera() called")
 
-    gpuImage = GPUImage(context)
-    gpuImage.setFilter(FilterFactory.create(currentFilter))
-    gpuImageView.setFilter(FilterFactory.create(currentFilter))
+        gpuImage = GPUImage(context)
+        gpuImage.setFilter(FilterFactory.create(currentFilter))
+        gpuImageView.setFilter(FilterFactory.create(currentFilter))
 
-    val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+        val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
 
-    cameraProviderFuture.addListener({
-        val cameraProvider = cameraProviderFuture.get()
+        cameraProviderFuture.addListener({
+            cameraProvider = cameraProviderFuture.get()
 
-        // -------- LIVE FILTER PREVIEW --------
-        val imageAnalysis = ImageAnalysis.Builder()
-            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-            .build()
+            Log.d(TAG, "CameraProvider obtained")
 
-        imageAnalysis.setAnalyzer(
-            ContextCompat.getMainExecutor(context)
-        ) { imageProxy ->
-            try {
-    val bitmap = imageProxy.toBitmap()
+            // 🔥 CLEAR OLD ANALYZER (FIX)
+            imageAnalysis?.clearAnalyzer()
 
-val finalBitmap = bitmap.rotateAndMirror(
-    rotationDegrees = imageProxy.imageInfo.rotationDegrees,
-    isFrontCamera = lensFacing == CameraSelector.LENS_FACING_FRONT
-)
+            // -------- LIVE FILTER PREVIEW --------
+            imageAnalysis = ImageAnalysis.Builder()
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                .build()
 
-gpuImageView.setImage(finalBitmap)
+            imageAnalysis!!.setAnalyzer(
+                ContextCompat.getMainExecutor(context)
+            ) { imageProxy ->
+                try {
+                    val bitmap = imageProxy.toBitmap()
 
+                    val finalBitmap = bitmap.rotateAndMirror(
+                        rotationDegrees = imageProxy.imageInfo.rotationDegrees,
+                        isFrontCamera = lensFacing == CameraSelector.LENS_FACING_FRONT
+                    )
 
-            } catch (e: Exception) {
-                Log.e(TAG, "Live filter error", e)
-            } finally {
-                imageProxy.close()
+                    gpuImageView.setImage(finalBitmap)
+
+                } catch (e: Exception) {
+                    Log.e(TAG, "Live filter error", e)
+                } finally {
+                    imageProxy.close()
+                }
             }
-        }
 
-        // -------- PHOTO --------
-        imageCapture = ImageCapture.Builder()
-        .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
-        .setFlashMode(ImageCapture.FLASH_MODE_OFF)
-        .setTargetRotation(gpuImageView.display.rotation) // 🔥 IMPORTANT
-        .build()
+            // -------- PHOTO --------
+            val rotation = gpuImageView.display?.rotation
+                ?: context.display?.rotation
+                ?: Surface.ROTATION_0
+
+            imageCapture = ImageCapture.Builder()
+                .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+                .setFlashMode(ImageCapture.FLASH_MODE_OFF)
+                .setTargetRotation(rotation)
+                .build()
 
 
-        // -------- VIDEO --------
-        val recorder = Recorder.Builder()
-            .setQualitySelector(QualitySelector.from(Quality.HIGHEST))
-            .build()
+            // -------- VIDEO --------
+            val recorder = Recorder.Builder()
+                .setQualitySelector(QualitySelector.from(Quality.HIGHEST))
+                .build()
 
-        videoCapture = VideoCapture.withOutput(recorder)
+            videoCapture = VideoCapture.withOutput(recorder)
 
-        val selector = CameraSelector.Builder()
-            .requireLensFacing(lensFacing)
-            .build()
+            val selector = CameraSelector.Builder()
+                .requireLensFacing(lensFacing)
+                .build()
 
-        cameraProvider.unbindAll()
+            // 🔥 CRITICAL FIX
+            cameraProvider?.unbindAll()
 
-        camera = cameraProvider.bindToLifecycle(
-            lifecycleOwner,
-            selector,
-            imageAnalysis,
-            imageCapture,
-            videoCapture
-        )
+            camera = cameraProvider?.bindToLifecycle(
+                lifecycleOwner,
+                selector,
+                imageAnalysis,
+                imageCapture,
+                videoCapture
+            )
 
-        Log.d(TAG, "Camera bound with LIVE GPUImage filter preview")
+            Log.d(TAG, "Camera bound with LIVE GPUImage filter preview")
 
-    }, ContextCompat.getMainExecutor(context))
-}
-
+        }, ContextCompat.getMainExecutor(context))
+    }
 
     // ---------------- FILTER CONTROL ----------------
 
     fun setFilter(filterName: String) {
+        val normalized = filterName
+            .trim()
+            .uppercase()
+            .replace(" ", "_")
 
-    val normalized = filterName
-        .trim()
-        .uppercase()
-        .replace(" ", "_")
+        currentFilter = try {
+            FilterType.valueOf(normalized)
+        } catch (e: Exception) {
+            Log.e(TAG, "Invalid filter name: $filterName", e)
+            FilterType.NONE
+        }
 
-    currentFilter = try {
-        FilterType.valueOf(normalized)
-    } catch (e: Exception) {
-        Log.e(TAG, "Invalid filter name: $filterName", e)
-        FilterType.NONE
+        val filter = FilterFactory.create(currentFilter)
+        gpuImage.setFilter(filter)
+        gpuImageView.setFilter(filter)
+
+        Log.d(TAG, "LIVE Filter changed to: $currentFilter")
     }
-
-    val filter = FilterFactory.create(currentFilter)
-    gpuImage.setFilter(filter)
-    gpuImageView.setFilter(filter)
-
-    Log.d(TAG, "LIVE Filter changed to: $currentFilter")
-}
-
 
     // ---------------- TORCH CONTROL ----------------
 
@@ -152,17 +160,15 @@ gpuImageView.setImage(finalBitmap)
         Log.d(TAG, "CameraX torch set to: $enabled")
     }
 
-
     fun setFlashMode(mode: String) {
-    imageCapture?.flashMode = when (mode) {
-        "on" -> ImageCapture.FLASH_MODE_OFF   // torch handles light
-        "auto" -> ImageCapture.FLASH_MODE_AUTO
-        else -> ImageCapture.FLASH_MODE_OFF
+        imageCapture?.flashMode = when (mode) {
+            "on" -> ImageCapture.FLASH_MODE_OFF
+            "auto" -> ImageCapture.FLASH_MODE_AUTO
+            else -> ImageCapture.FLASH_MODE_OFF
+        }
+
+        Log.d(TAG, "ImageCapture flashMode set to $mode")
     }
-
-    Log.d(TAG, "ImageCapture flashMode set to $mode")
-}
-
 
     // ---------------- SWITCH CAMERA ----------------
 
@@ -183,59 +189,60 @@ gpuImageView.setImage(finalBitmap)
         startCamera(lifecycleOwner)
     }
 
-    // ---------------- PHOTO (UNCHANGED) ----------------
+    // ---------------- PHOTO ----------------
 
     fun takePhoto(
-    flashMode: String,
-    onResult: (String?) -> Unit
-) {
-    Log.d(TAG, "takePhoto() called with flashMode=$flashMode")
+        flashMode: String,
+        onResult: (String?) -> Unit
+    ) {
+        Log.d(TAG, "takePhoto() called with flashMode=$flashMode")
 
-    val capture = imageCapture ?: return
+        val capture = imageCapture ?: return
 
-    // 🔥 THIS IS THE IMPORTANT LINE
-    capture.targetRotation = gpuImageView.display.rotation
+            capture.targetRotation =
+                gpuImageView.display?.rotation
+                    ?: context.display?.rotation
+                    ?: Surface.ROTATION_0
 
-    val fileName = "IMG_${System.currentTimeMillis()}"
+        val fileName = "IMG_${System.currentTimeMillis()}"
 
-    val contentValues = ContentValues().apply {
-        put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
-        put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-        put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/Pixora")
+        val contentValues = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+            put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+            put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/Pixora")
+        }
+
+        val outputOptions = ImageCapture.OutputFileOptions.Builder(
+            context.contentResolver,
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            contentValues
+        ).build()
+
+        capture.takePicture(
+            outputOptions,
+            ContextCompat.getMainExecutor(context),
+            object : ImageCapture.OnImageSavedCallback {
+
+                override fun onImageSaved(result: ImageCapture.OutputFileResults) {
+                    val uri = result.savedUri
+                    Log.d(TAG, "Photo saved: $uri")
+
+                    if (lensFacing == CameraSelector.LENS_FACING_FRONT && uri != null) {
+                        mirrorSavedImage(uri)
+                    }
+
+                    onResult(uri?.toString())
+                }
+
+                override fun onError(exception: ImageCaptureException) {
+                    Log.e(TAG, "Photo capture failed", exception)
+                    onResult(null)
+                }
+            }
+        )
     }
 
-    val outputOptions = ImageCapture.OutputFileOptions.Builder(
-        this.context.contentResolver,
-        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-        contentValues
-    ).build()
-
-    capture.takePicture(
-        outputOptions,
-        ContextCompat.getMainExecutor(context),
-        object : ImageCapture.OnImageSavedCallback {
-
-            override fun onImageSaved(result: ImageCapture.OutputFileResults) {
-            val uri = result.savedUri
-            Log.d(TAG, "Photo saved: $uri")
-
-            if (lensFacing == CameraSelector.LENS_FACING_FRONT && uri != null) {
-                mirrorSavedImage(uri)
-            }
-
-            onResult(uri?.toString())
-        }
-
-            override fun onError(exception: ImageCaptureException) {
-                Log.e(TAG, "Photo capture failed", exception)
-                onResult(null)
-            }
-        }
-    )
-}
-
-
-    // ---------------- VIDEO (UNCHANGED) ----------------
+    // ---------------- VIDEO ----------------
 
     fun startRecording(onResult: (String?) -> Unit) {
         Log.d(TAG, "startRecording() called")
@@ -251,7 +258,7 @@ gpuImageView.setImage(finalBitmap)
         }
 
         val outputOptions = MediaStoreOutputOptions.Builder(
-            this.context.contentResolver,
+            context.contentResolver,
             MediaStore.Video.Media.EXTERNAL_CONTENT_URI
         ).setContentValues(contentValues).build()
 
@@ -271,62 +278,72 @@ gpuImageView.setImage(finalBitmap)
             }
     }
 
-        private fun mirrorSavedImage(uri: android.net.Uri) {
-    try {
-        val inputStream =
-            context.contentResolver.openInputStream(uri)
-
-        val bitmap = BitmapFactory.decodeStream(inputStream)
-        inputStream?.close()
-
-        if (bitmap == null) {
-            Log.e(TAG, "Bitmap decode failed")
-            return
-        }
-
-        val matrix = Matrix().apply {
-            postScale(
-                -1f,
-                1f,
-                bitmap.width / 2f,
-                bitmap.height / 2f
-            )
-        }
-
-        val mirroredBitmap = Bitmap.createBitmap(
-            bitmap,
-            0,
-            0,
-            bitmap.width,
-            bitmap.height,
-            matrix,
-            true
-        )
-
-        context.contentResolver.openOutputStream(uri)?.use { outputStream ->
-            mirroredBitmap.compress(
-                Bitmap.CompressFormat.JPEG,
-                95,
-                outputStream
-            )
-        }
-
-        Log.d(TAG, "Front camera image mirrored successfully")
-
-    } catch (e: Exception) {
-        Log.e(TAG, "Failed to mirror saved image", e)
-    }
-}
-
-
-
     fun stopRecording() {
         activeRecording?.stop()
         activeRecording = null
     }
+
+    // ---------------- CLEANUP (🔥 FIXED) ----------------
+
+    fun cleanup() {
+        try {
+            Log.d(TAG, "CameraController cleanup started")
+
+            stopRecording()
+            setTorch(false)
+
+            // 🔥 MOST IMPORTANT LINE
+            cameraProvider?.unbindAll()
+
+            imageAnalysis?.clearAnalyzer()
+            imageAnalysis = null
+
+            camera = null
+            imageCapture = null
+            videoCapture = null
+            activeRecording = null
+
+            Log.d(TAG, "CameraController cleanup completed")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error during CameraController cleanup", e)
+        }
+    }
+
+    // ---------------- FRONT MIRROR ----------------
+
+    private fun mirrorSavedImage(uri: android.net.Uri) {
+        try {
+            val inputStream = context.contentResolver.openInputStream(uri)
+            val bitmap = BitmapFactory.decodeStream(inputStream)
+            inputStream?.close()
+
+            if (bitmap == null) {
+                Log.e(TAG, "Bitmap decode failed")
+                return
+            }
+
+            val matrix = Matrix().apply {
+                postScale(-1f, 1f, bitmap.width / 2f, bitmap.height / 2f)
+            }
+
+            val mirroredBitmap = Bitmap.createBitmap(
+                bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true
+            )
+
+            context.contentResolver.openOutputStream(uri)?.use {
+                mirroredBitmap.compress(Bitmap.CompressFormat.JPEG, 95, it)
+            }
+
+            Log.d(TAG, "Front camera image mirrored successfully")
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to mirror saved image", e)
+        }
+    }
 }
 
 // ---------------- IMAGE EXTENSION ----------------
+
 private fun ImageProxy.toBitmap(): Bitmap {
     val yBuffer = planes[0].buffer
     val uBuffer = planes[1].buffer
@@ -343,40 +360,13 @@ private fun ImageProxy.toBitmap(): Bitmap {
     uBuffer.get(nv21, ySize + vSize, uSize)
 
     val yuvImage = YuvImage(
-        nv21,
-        ImageFormat.NV21,
-        width,
-        height,
-        null
+        nv21, ImageFormat.NV21, width, height, null
     )
 
     val out = ByteArrayOutputStream()
     yuvImage.compressToJpeg(Rect(0, 0, width, height), 90, out)
 
-    return BitmapFactory.decodeByteArray(
-        out.toByteArray(),
-        0,
-        out.size()
-    )
-}
-
-
-private fun Bitmap.rotate(degrees: Int): Bitmap {
-    if (degrees == 0) return this
-
-    val matrix = Matrix().apply {
-        postRotate(degrees.toFloat())
-    }
-
-    return Bitmap.createBitmap(
-        this,
-        0,
-        0,
-        width,
-        height,
-        matrix,
-        true
-    )
+    return BitmapFactory.decodeByteArray(out.toByteArray(), 0, out.size())
 }
 
 private fun Bitmap.rotateAndMirror(
@@ -384,27 +374,11 @@ private fun Bitmap.rotateAndMirror(
     isFrontCamera: Boolean
 ): Bitmap {
     val matrix = Matrix()
-
-    // Rotate first
     matrix.postRotate(rotationDegrees.toFloat())
 
-    // Mirror ONLY for front camera
     if (isFrontCamera) {
-        matrix.postScale(
-            -1f,
-            1f,
-            width / 2f,
-            height / 2f
-        )
+        matrix.postScale(-1f, 1f, width / 2f, height / 2f)
     }
 
-    return Bitmap.createBitmap(
-        this,
-        0,
-        0,
-        width,
-        height,
-        matrix,
-        true
-    )
+    return Bitmap.createBitmap(this, 0, 0, width, height, matrix, true)
 }

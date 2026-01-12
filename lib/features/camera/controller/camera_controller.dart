@@ -18,6 +18,8 @@ class CameraControllerX extends ChangeNotifier {
   FlashModeX flashMode = FlashModeX.off;
   bool isFrontCamera = false;
   bool isCameraReady = false;
+  int _previewKey = 0;
+  int get previewKey => _previewKey;
 
   // -------------------- ⏱ RECORDING TIMER --------------------
   Timer? _recordTimer;
@@ -147,6 +149,40 @@ class CameraControllerX extends ChangeNotifier {
     final m = two(recordingDuration.inMinutes.remainder(60));
     final s = two(recordingDuration.inSeconds.remainder(60));
     return '$h:$m:$s';
+  }
+
+  /// 🟢 Called when app resumes
+  void restartCamera() {
+    debugPrint('🟢 Restarting camera');
+
+    _previewKey++; // 🔥 FORCE AndroidView recreation
+    isCameraReady = false;
+
+    notifyListeners();
+
+    // Small delay ensures Surface is recreated
+    Future.delayed(const Duration(milliseconds: 200), () {
+      isCameraReady = true;
+      notifyListeners();
+    });
+  }
+
+  /// 🔴 Called when app pauses
+  void disposeCamera() {
+    debugPrint('🔴 Disposing camera');
+
+    isCameraReady = false;
+
+    // Stop recording safely
+    if (isRecording) {
+      stopRecording();
+    }
+
+    // Disable flash
+    flashMode = FlashModeX.off;
+    FlashService.setFlashMode(FlashModeX.off);
+
+    notifyListeners();
   }
 
   // -------------------- Cleanup --------------------
