@@ -10,76 +10,83 @@ class DirectoryView {
 
 class GalleryController extends ChangeNotifier {
   final List<MediaItem> _media = [];
+
   bool _isLoading = false;
   bool _isDeleting = false;
+
+  bool _isVideoPlaying = true;
 
   List<MediaItem> get media => _media;
   bool get isLoading => _isLoading;
   bool get isDeleting => _isDeleting;
-
-  bool _isVideoPlaying = true;
   bool get isVideoPlaying => _isVideoPlaying;
 
-  // 🔥 REAL MEDIA LOADER
+  // ==========================================================
+  // 🚀 FAST ASYNC MEDIA LOADER (NO UI BLOCKING)
+  // ==========================================================
+
   Future<void> loadMedia() async {
+    if (_isLoading) return;
+
     _isLoading = true;
     notifyListeners();
 
     _media.clear();
 
     try {
-      // 📸 Load Images
+      final List<_MediaWithTime> temp = [];
+
+      // 📸 IMAGES
       final imageDir = Directory(DirectoryView.imageDir);
       if (await imageDir.exists()) {
-        final imageFiles = imageDir
-            .listSync()
-            .whereType<File>()
-            .where(
-              (file) =>
-                  file.path.toLowerCase().endsWith('.jpg') ||
-                  file.path.toLowerCase().endsWith('.jpeg') ||
-                  file.path.toLowerCase().endsWith('.png'),
-            )
-            .toList();
-
-        for (final file in imageFiles) {
-          _media.add(MediaItem(file: file, type: MediaType.image));
+        await for (final entity in imageDir.list(followLinks: false)) {
+          if (entity is File &&
+              _isImage(entity.path)) {
+            final stat = await entity.stat();
+            temp.add(
+              _MediaWithTime(
+                item: MediaItem(file: entity, type: MediaType.image),
+                time: stat.modified,
+              ),
+            );
+          }
         }
       }
 
-      // 🎥 Load Videos
+      // 🎥 VIDEOS
       final videoDir = Directory(DirectoryView.videoDir);
       if (await videoDir.exists()) {
-        final videoFiles = videoDir
-            .listSync()
-            .whereType<File>()
-            .where(
-              (file) =>
-                  file.path.toLowerCase().endsWith('.mp4') ||
-                  file.path.toLowerCase().endsWith('.mov') ||
-                  file.path.toLowerCase().endsWith('.mkv'),
-            )
-            .toList();
-
-        for (final file in videoFiles) {
-          _media.add(MediaItem(file: file, type: MediaType.video));
+        await for (final entity in videoDir.list(followLinks: false)) {
+          if (entity is File &&
+              _isVideo(entity.path)) {
+            final stat = await entity.stat();
+            temp.add(
+              _MediaWithTime(
+                item: MediaItem(file: entity, type: MediaType.video),
+                time: stat.modified,
+              ),
+            );
+          }
         }
       }
 
-      // 🔽 Sort by latest first
-      _media.sort(
-        (a, b) =>
-            b.file.lastModifiedSync().compareTo(a.file.lastModifiedSync()),
-      );
+      // 🔽 SORT (LATEST FIRST)
+      temp.sort((a, b) => b.time.compareTo(a.time));
+
+      _media.addAll(temp.map((e) => e.item));
+
     } catch (e) {
-      debugPrint('Gallery load error: $e');
+      debugPrint('❌ Gallery load error: $e');
     }
 
     _isLoading = false;
     notifyListeners();
   }
 
-  // 🗑️ DELETE FROM DISK + UI
+  // ==========================================================
+  // 🗑️ DELETE
+  // ==========================================================
+
   Future<bool> deleteMedia(MediaItem item) async {
     if (_isDeleting) return false;
 
@@ -92,7 +99,7 @@ class GalleryController extends ChangeNotifier {
       }
       _media.remove(item);
     } catch (e) {
-      debugPrint('Delete error: $e');
+      debugPrint('❌ Delete error: $e');
       _isDeleting = false;
       notifyListeners();
       return false;
@@ -103,56 +110,32 @@ class GalleryController extends ChangeNotifier {
     return true;
   }
 
-  /// Deletes current item and returns the next index to navigate to.
-  /// Returns `null` if gallery becomes empty.
-  /// Deletes current item and returns the next index to navigate to.
-  /// Returns `null` if gallery becomes empty.
   Future<int?> deleteAndResolveIndex(int currentIndex) async {
-    debugPrint('🗑️ [Gallery] Delete requested at index: $currentIndex');
-
     if (currentIndex < 0 || currentIndex >= _media.length) {
-      debugPrint('⚠️ [Gallery] Invalid index: $currentIndex');
       return currentIndex;
     }
 
     final item = _media[currentIndex];
-    debugPrint('📄 [Gallery] Deleting file: ${item.file.path}');
-
     final deleted = await deleteMedia(item);
 
-    if (!deleted) {
-      debugPrint('❌ [Gallery] Delete failed');
-      return currentIndex;
-    }
+    if (!deleted) return currentIndex;
+    if (_media.isEmpty) return null;
 
-    debugPrint('✅ [Gallery] Delete successful');
-    debugPrint('📊 [Gallery] Remaining items count: ${_media.length}');
-
-    if (_media.isEmpty) {
-      debugPrint('🚪 [Gallery] Gallery empty, should close viewer');
-      return null;
-    }
-
-    // Decide next index
     if (currentIndex >= _media.length) {
-      final newIndex = _media.length - 1;
-      debugPrint(
-        '⬅️ [Gallery] Deleted last item, moving to previous index: $newIndex',
-      );
-      return newIndex;
+      return _media.length - 1;
     }
-
-    debugPrint('➡️ [Gallery] Showing next item at same index: $currentIndex');
     return currentIndex;
   }
 
-  // ▶️ Toggle play / pause
+  // ==========================================================
+  // ▶️ VIDEO STATE
+  // ==========================================================
+
   void toggleVideoPlayback() {
     _isVideoPlaying = !_isVideoPlaying;
     notifyListeners();
   }
 
-  // Reset when page changes
   void setVideoPlaying(bool value) {
     _isVideoPlaying = value;
     notifyListeners();
@@ -162,4 +145,32 @@ class GalleryController extends ChangeNotifier {
     _isVideoPlaying = false;
     notifyListeners();
   }
+
+  // ==========================================================
+  // 🔍 HELPERS
+  // ==========================================================
+
+  bool _isImage(String path) {
+    final p = path.toLowerCase();
+    return p.endsWith('.jpg') || p.endsWith('.jpeg') || p.endsWith('.png');
+  }
+
+  bool _isVideo(String path) {
+    final p = path.toLowerCase();
+    return p.endsWith('.mp4') || p.endsWith('.mov') || p.endsWith('.mkv');
+  }
+}
+
+// ==========================================================
+// 🔥 INTERNAL SORT MODEL (FAST)
+// ==========================================================
+
+class _MediaWithTime {
+  final MediaItem item;
+  final DateTime time;
+
+  _MediaWithTime({
+    required this.item,
+    required this.time,
+  });
 }

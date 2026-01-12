@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:pixora/core/theme/app_colors.dart';
 import 'package:pixora/core/platform/camera_service.dart';
+import 'package:pixora/features/camera/widgets/camera_blink_overlays.dart';
 import 'package:pixora/features/gallery/view/gallery_grid_screen.dart';
 import 'package:provider/provider.dart';
 import '../controller/camera_controller.dart';
@@ -164,6 +165,8 @@ class _CaptureButton extends StatelessWidget {
 
   Future<void> _handleTap() async {
     if (controller.isPhotoMode) {
+      // 🔥 BLINK EFFECT
+      CameraFlashOverlay.blink();
       final uri = await CameraService.takePhoto(controller.flashMode.name);
       if (uri != null) {
         log("Photo saved: $uri");

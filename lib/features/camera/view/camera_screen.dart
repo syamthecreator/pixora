@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pixora/core/theme/app_colors.dart';
 import 'package:pixora/core/utils/permission_handler.dart';
 import 'package:pixora/features/camera/controller/camera_controller.dart';
+import 'package:pixora/features/camera/widgets/camera_blink_overlays.dart';
 import 'package:pixora/features/camera/widgets/camera_bottom_bar.dart';
 import 'package:pixora/features/camera/widgets/camera_filter_bar.dart';
 import 'package:pixora/features/camera/widgets/camera_preview.dart';
@@ -19,7 +20,6 @@ class CameraScreen extends StatefulWidget {
 
 class _CameraScreenState extends State<CameraScreen>
     with WidgetsBindingObserver {
-
   @override
   void initState() {
     super.initState();
@@ -84,9 +84,7 @@ class _CameraScreenState extends State<CameraScreen>
       body: Stack(
         children: [
           // 🔥 CAMERA PREVIEW
-          const Positioned.fill(
-            child: CameraPreviewView(),
-          ),
+          const Positioned.fill(child: CameraPreviewView()),
 
           // 🔝 TOP BAR
           SafeArea(
@@ -94,8 +92,7 @@ class _CameraScreenState extends State<CameraScreen>
             child: Align(
               alignment: Alignment.topCenter,
               child: CameraTopBar(
-                onTapSettingsIcon: () =>
-                    settings.showQuickSettings(context),
+                onTapSettingsIcon: () => settings.showQuickSettings(context),
               ),
             ),
           ),
@@ -115,11 +112,15 @@ class _CameraScreenState extends State<CameraScreen>
               padding: const EdgeInsets.all(10),
               decoration: const BoxDecoration(
                 color: AppColors.black,
-                borderRadius:
-                    BorderRadius.vertical(top: Radius.circular(28)),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
               ),
               child: const CameraBottomBar(),
             ),
+          ),
+
+          // 🔥🔥 CAMERA CAPTURE BLINK OVERLAY (ADD THIS)
+          Positioned.fill(
+            child: CameraFlashOverlay(key: CameraFlashOverlay.flashKey),
           ),
         ],
       ),
