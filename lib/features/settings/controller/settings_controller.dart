@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pixora/core/theme/app_colors.dart';
-import 'package:pixora/features/camera/widgets/quick_settings_sheet.dart';
-import 'package:pixora/core/routes/app_routes.dart';
 
 /// Supported camera aspect ratios
 enum CameraRatio { oneOne, fourThree, sixteenNine, full }
@@ -10,10 +7,7 @@ enum CameraRatio { oneOne, fourThree, sixteenNine, full }
 class SettingsController extends ChangeNotifier {
   // -------------------- Constants --------------------
   static const List<String> _availableRatios = ["1:1", "4:3", "16:9", "Full"];
-  static const List<String> _availableTimers = ["Off", "3s", "5s", "10s"];
-  static const Duration _quickSettingsAnimationDuration =
-      Duration(milliseconds: 300);
-  static const double _quickSettingsBarrierOpacity = 0.6;
+  List<String> get availableRatios => _availableRatios;
 
   // -------------------- Quick Toggles --------------------
   bool gridLines = true;
@@ -42,7 +36,6 @@ class SettingsController extends ChangeNotifier {
 
   // -------------------- Ratio & Timer --------------------
   String selectedRatio = "Full";
-  String selectedTimer = "Off";
 
   /// Updates selected aspect ratio
   void selectRatio(String ratio) {
@@ -52,62 +45,8 @@ class SettingsController extends ChangeNotifier {
     }
   }
 
-  /// Updates selected timer
-  void selectTimer(String timer) {
-    if (selectedTimer != timer) {
-      selectedTimer = timer;
-      notifyListeners();
-    }
-  }
-
   /// Returns selected ratio index
   int getRatioIndex() => _availableRatios.indexOf(selectedRatio);
-
-  /// Returns selected timer index
-  int getTimerIndex() => _availableTimers.indexOf(selectedTimer);
-
-
-  // -------------------- Quick Settings UI --------------------
-
-  /// Shows quick settings overlay
-  void showQuickSettings(BuildContext context) {
-    showGeneralDialog(
-      context: context,
-      barrierLabel: "QuickSettings",
-      barrierDismissible: true,
-      barrierColor: AppColors.kSecondaryColour.withAlpha(
-        (255 * _quickSettingsBarrierOpacity).toInt(),
-      ),
-      transitionDuration: _quickSettingsAnimationDuration,
-      pageBuilder: (_, _, _) => Align(
-        alignment: Alignment.topCenter,
-        child: QuickSettingsSheet(
-          onClose: () => hideQuickSettings(context),
-          onMoreSettings: () => moreSettings(context),
-          settingsController: this,
-        ),
-      ),
-      transitionBuilder: (_, animation, _, child) => SlideTransition(
-        position: Tween(begin: const Offset(0, -1), end: Offset.zero).animate(
-          CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
-        ),
-        child: child,
-      ),
-    );
-  }
-
-  /// Closes quick settings overlay
-  void hideQuickSettings(BuildContext context) {
-    Navigator.of(context).pop();
-  }
-
-  /// Opens full settings screen
-  void moreSettings(BuildContext context) {
-    Navigator.of(context).pop();
-    Navigator.of(context).pushNamed(AppRoutes.settingsScreen);
-  }
-
-  // -------------------- Toggle Actions --------------------
 
   /// Toggles grid overlay
   void toggleGridLines() {

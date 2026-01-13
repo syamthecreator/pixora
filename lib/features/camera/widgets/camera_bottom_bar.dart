@@ -1,10 +1,8 @@
-import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:pixora/core/theme/app_colors.dart';
 import 'package:pixora/core/platform/camera_service.dart';
-import 'package:pixora/features/camera/widgets/camera_blink_overlays.dart';
-import 'package:pixora/features/gallery/controller/gallery_controller.dart';
 import 'package:pixora/features/gallery/view/gallery_grid_screen.dart';
+import 'package:pixora/features/settings/controller/settings_controller.dart';
 import 'package:provider/provider.dart';
 import '../controller/camera_controller.dart';
 import 'camera_overlays.dart';
@@ -82,11 +80,12 @@ class _CaptureSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<CameraControllerX>();
+    final controller2 = context.watch<SettingsController>();
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _CaptureButton(controller: controller),
+        _CaptureButton(controller: controller, controller2: controller2),
         const SizedBox(height: 8),
         _RecordingTimer(controller: controller),
       ],
@@ -140,16 +139,15 @@ class _RecordingTimer extends StatelessWidget {
 
 class _CaptureButton extends StatelessWidget {
   final CameraControllerX controller;
+  final SettingsController controller2;
 
-  const _CaptureButton({required this.controller});
-
-  static Future<String?>? _videoSaveFuture;
+  const _CaptureButton({required this.controller, required this.controller2});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => _handleTap(context),
-      onLongPressEnd: (_) => _handleStop(),
+      onTap: () => controller.handleTap(context),
+      onLongPressEnd: (_) => controller.handleStop(),
       child: const SizedBox(
         width: 90,
         height: 90,
@@ -159,65 +157,6 @@ class _CaptureButton extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  // ---------------- TAP ----------------
-  Future<void> _handleTap(BuildContext context) async {
-    log("📸 TAP: Capture button pressed");
-
-    if (controller.isPhotoMode) {
-      CameraFlashOverlay.blink();
-
-      final uri = await CameraService.takePhoto(controller.flashMode.name);
-
-      log("📸 takePhoto() returned: $uri");
-
-      if (uri != null && context.mounted) {
-        _refreshGallery(context, newUri: uri);
-      }
-      return;
-    }
-
-    // ---------- START VIDEO ----------
-    if (!controller.isRecording) {
-      log("🎥 START recording");
-      controller.startRecording();
-      _videoSaveFuture = CameraService.startRecording();
-      return;
-    }
-
-    // ---------- STOP VIDEO ----------
-    log("🎥 STOP recording");
-    await _handleStop();
-  }
-
-  void _refreshGallery(BuildContext context, {required String newUri}) {
-    try {
-      final gallery = context.read<GalleryController>();
-
-      log("🔄 Gallery refresh requested with new URI");
-
-      gallery.loadMedia(); // full reload (safe)
-    } catch (e) {
-      log("⚠️ Gallery not in tree: $e");
-    }
-  }
-
-  // ---------------- STOP (tap OR long-press) ----------------
-  Future<void> _handleStop() async {
-    if (!controller.isRecording) return;
-
-    controller.stopRecording();
-    await CameraService.stopRecording();
-
-    // 🔑 WAIT FOR FINALIZE
-    final uri = await _videoSaveFuture;
-
-    if (uri != null) {
-      log("Video saved: $uri");
-    }
-
-    _videoSaveFuture = null;
   }
 }
 

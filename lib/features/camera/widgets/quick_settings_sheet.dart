@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:pixora/core/theme/app_colors.dart';
+import 'package:pixora/features/camera/controller/camera_controller.dart';
 import 'package:pixora/features/settings/controller/settings_controller.dart';
 
 class QuickSettingsSheet extends StatelessWidget {
   final VoidCallback onClose;
   final VoidCallback onMoreSettings;
   final SettingsController settingsController;
+  final CameraControllerX cameraControllerX;
   const QuickSettingsSheet({
     super.key,
     required this.onClose,
     required this.onMoreSettings,
     required this.settingsController,
+    required this.cameraControllerX,
   });
   @override
   Widget build(BuildContext context) {
@@ -34,7 +37,7 @@ class QuickSettingsSheet extends StatelessWidget {
             const SizedBox(height: 20),
             _RatioSection(controller: settingsController),
             const SizedBox(height: 14),
-            _TimerSection(controller: settingsController),
+            _TimerSection(controller: cameraControllerX),
             const SizedBox(height: 14),
             _ToggleGridSection(controller: settingsController),
           ],
@@ -98,7 +101,7 @@ class _RatioSection extends StatelessWidget {
       listenable: controller,
       builder: (context, _) {
         return _SettingsOptionRow(
-          items: const ["1:1", "4:3", "16:9", "Full"],
+          items: controller.availableRatios,
           selectedIndex: controller.getRatioIndex(),
           onItemSelected: controller.selectRatio,
         );
@@ -108,7 +111,7 @@ class _RatioSection extends StatelessWidget {
 }
 
 class _TimerSection extends StatelessWidget {
-  final SettingsController controller;
+  final CameraControllerX controller;
   const _TimerSection({required this.controller});
   @override
   Widget build(BuildContext context) {
@@ -116,7 +119,7 @@ class _TimerSection extends StatelessWidget {
       listenable: controller,
       builder: (context, _) {
         return _SettingsOptionRow(
-          items: const ["Off", "3s", "5s", "10s"],
+          items: controller.availableTimers,
           selectedIndex: controller.getTimerIndex(),
           onItemSelected: controller.selectTimer,
         );

@@ -4,10 +4,10 @@ import 'package:pixora/core/utils/permission_handler.dart';
 import 'package:pixora/features/camera/controller/camera_controller.dart';
 import 'package:pixora/features/camera/widgets/camera_blink_overlays.dart';
 import 'package:pixora/features/camera/widgets/camera_bottom_bar.dart';
+import 'package:pixora/features/camera/widgets/camera_countdown_overlay.dart';
 import 'package:pixora/features/camera/widgets/camera_filter_bar.dart';
 import 'package:pixora/features/camera/widgets/camera_preview.dart';
 import 'package:pixora/features/camera/widgets/camera_top_bar.dart';
-import 'package:pixora/features/settings/controller/settings_controller.dart';
 import 'package:pixora/core/routes/app_routes.dart';
 import 'package:provider/provider.dart';
 
@@ -77,7 +77,7 @@ class _CameraScreenState extends State<CameraScreen>
 
   @override
   Widget build(BuildContext context) {
-    final settings = context.watch<SettingsController>();
+    final cameraControllerX = context.watch<CameraControllerX>();
 
     return Scaffold(
       backgroundColor: AppColors.kSecondaryColour,
@@ -92,7 +92,8 @@ class _CameraScreenState extends State<CameraScreen>
             child: Align(
               alignment: Alignment.topCenter,
               child: CameraTopBar(
-                onTapSettingsIcon: () => settings.showQuickSettings(context),
+                onTapSettingsIcon: () =>
+                    cameraControllerX.showQuickSettings(context),
               ),
             ),
           ),
@@ -117,7 +118,8 @@ class _CameraScreenState extends State<CameraScreen>
               child: const CameraBottomBar(),
             ),
           ),
-
+          // ⏱️ COUNTDOWN (ABOVE UI)
+          const Positioned.fill(child: CameraCountdownOverlay()),
           // 🔥🔥 CAMERA CAPTURE BLINK OVERLAY (ADD THIS)
           Positioned.fill(
             child: CameraFlashOverlay(key: CameraFlashOverlay.flashKey),
