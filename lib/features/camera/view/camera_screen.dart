@@ -118,9 +118,11 @@ class _CameraScreenState extends State<CameraScreen>
               child: const CameraBottomBar(),
             ),
           ),
-          // ⏱️ COUNTDOWN (ABOVE UI)
+
+          // ⏱️ COUNTDOWN
           const Positioned.fill(child: CameraCountdownOverlay()),
-          // 🔥🔥 CAMERA CAPTURE BLINK OVERLAY (ADD THIS)
+
+          // 📸 CAPTURE FLASH
           Positioned.fill(
             child: CameraFlashOverlay(key: CameraFlashOverlay.flashKey),
           ),

@@ -14,12 +14,10 @@ class CameraPreviewView extends StatelessWidget {
 
     if (defaultTargetPlatform == TargetPlatform.android) {
       return AndroidView(
-        key: ValueKey(camera.previewKey), // 🔥 Forces rebuild
+        key: ValueKey(camera.previewKey),
         viewType: NativeSide.cameraPreview,
         layoutDirection: TextDirection.ltr,
-        creationParams: {
-          'ratio': camera.selectedRatio, // 👈 PASS TO NATIVE
-        },
+        creationParams: {'ratio': camera.selectedRatio},
         creationParamsCodec: const StandardMessageCodec(),
       );
     }

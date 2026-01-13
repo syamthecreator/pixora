@@ -29,6 +29,8 @@ class CameraControllerX extends ChangeNotifier {
   bool isRecording = false;
   bool isFrontCamera = false;
   bool isCameraReady = false;
+    bool gridLines = true;
+
 
   FlashModeX flashMode = FlashModeX.off;
 
@@ -44,8 +46,7 @@ class CameraControllerX extends ChangeNotifier {
   static const List<String> _availableRatios = ["4:3", "16:9", "Full"];
   List<String> get availableRatios => _availableRatios;
   String selectedRatio = "4:3";
-    String get _selectedRatio => selectedRatio;
-
+  String get _selectedRatio => selectedRatio;
 
   bool _showCountdown = false;
   int _countdown = 0;
@@ -190,6 +191,13 @@ class CameraControllerX extends ChangeNotifier {
 
     notifyListeners();
   }
+
+   /// Toggles grid overlay
+  void toggleGridLines() {
+    gridLines = !gridLines;
+    notifyListeners();
+  }
+
 
   // -------------------- App Lifecycle --------------------
   void restartCamera() {
@@ -380,24 +388,12 @@ class CameraControllerX extends ChangeNotifier {
 
   /// Used to force AndroidView rebuild
 
-
   void updateRatio(String ratio) {
     if (_selectedRatio == ratio) return;
-
     selectedRatio = ratio;
-
-    /// 🔥 Force AndroidView recreation
     _previewKey++;
 
     notifyListeners();
-  }
-
-  /// Updates selected aspect ratio
-  void selectRatio(String ratio) {
-    if (selectedRatio != ratio) {
-      selectedRatio = ratio;
-      notifyListeners();
-    }
   }
 
   // -------------------- Cleanup --------------------

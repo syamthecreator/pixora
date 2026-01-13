@@ -39,7 +39,10 @@ class QuickSettingsSheet extends StatelessWidget {
             const SizedBox(height: 14),
             _TimerSection(controller: cameraControllerX),
             const SizedBox(height: 14),
-            _ToggleGridSection(controller: settingsController),
+            // _ToggleGridSection(
+            //   controller: settingsController,
+            //   controller2: cameraControllerX,
+            // ),
           ],
         ),
       ),
@@ -105,8 +108,7 @@ class _RatioSection extends StatelessWidget {
           items: controller.availableRatios,
           selectedIndex: controller.getRatioIndex(),
           onItemSelected: (ratio) {
-            controller.selectRatio(ratio);
-            controller.updateRatio(ratio); // 🔥 LINKED
+            controller.updateRatio(ratio);
           },
         );
       },
@@ -132,40 +134,44 @@ class _TimerSection extends StatelessWidget {
   }
 }
 
-class _ToggleGridSection extends StatelessWidget {
-  final SettingsController controller;
-  const _ToggleGridSection({required this.controller});
-  @override
-  Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: controller,
-      builder: (context, _) {
-        return Wrap(
-          spacing: 12,
-          runSpacing: 12,
-          children: [
-            _ToggleTile(
-              label: "Grid lines",
-              isActive: controller.gridLines,
-              onTap: controller.toggleGridLines,
-            ),
+// class _ToggleGridSection extends StatelessWidget {
+//   final SettingsController controller;
+//   final CameraControllerX controller2;
+//   const _ToggleGridSection({
+//     required this.controller,
+//     required this.controller2,
+//   });
+//   @override
+//   Widget build(BuildContext context) {
+//     return ListenableBuilder(
+//       listenable: controller,
+//       builder: (context, _) {
+//         return Wrap(
+//           spacing: 12,
+//           runSpacing: 12,
+//           children: [
+//             _ToggleTile(
+//               label: "Grid lines",
+//               isActive: controller2.gridLines,
+//               onTap: controller2.toggleGridLines,
+//             ),
 
-            _ToggleTile(
-              label: "Watermark",
-              isActive: controller.watermark,
-              onTap: controller.toggleWatermark,
-            ),
-            _ToggleTile(
-              label: "HDR",
-              isActive: controller.hdr,
-              onTap: controller.toggleHDR,
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
+//             _ToggleTile(
+//               label: "Watermark",
+//               isActive: controller.watermark,
+//               onTap: controller.toggleWatermark,
+//             ),
+//             _ToggleTile(
+//               label: "HDR",
+//               isActive: controller.hdr,
+//               onTap: controller.toggleHDR,
+//             ),
+//           ],
+//         );
+//       },
+//     );
+//   }
+// }
 
 class _SettingsOptionRow extends StatelessWidget {
   final List<String> items;
@@ -234,43 +240,43 @@ class _OptionTile extends StatelessWidget {
   }
 }
 
-class _ToggleTile extends StatelessWidget {
-  final String label;
-  final bool isActive;
-  final VoidCallback onTap;
-  const _ToggleTile({
-    required this.label,
-    required this.isActive,
-    required this.onTap,
-  });
-  @override
-  Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final tileWidth = (screenWidth - 60) / 3;
-    return SizedBox(
-      width: tileWidth,
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          decoration: BoxDecoration(
-            color: isActive
-                ? AppColors.kPrimaryColour.withValues(alpha: 0.18)
-                : AppColors.kInactiveOptionColour,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Center(
-            child: Text(
-              label,
-              style: TextStyle(
-                color: isActive ? AppColors.kPrimaryColour : Colors.white60,
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
+// class _ToggleTile extends StatelessWidget {
+//   final String label;
+//   final bool isActive;
+//   final VoidCallback onTap;
+//   const _ToggleTile({
+//     required this.label,
+//     required this.isActive,
+//     required this.onTap,
+//   });
+//   @override
+//   Widget build(BuildContext context) {
+//     final screenWidth = MediaQuery.of(context).size.width;
+//     final tileWidth = (screenWidth - 60) / 3;
+//     return SizedBox(
+//       width: tileWidth,
+//       child: GestureDetector(
+//         onTap: onTap,
+//         child: Container(
+//           padding: const EdgeInsets.symmetric(vertical: 14),
+//           decoration: BoxDecoration(
+//             color: isActive
+//                 ? AppColors.kPrimaryColour.withValues(alpha: 0.18)
+//                 : AppColors.kInactiveOptionColour,
+//             borderRadius: BorderRadius.circular(12),
+//           ),
+//           child: Center(
+//             child: Text(
+//               label,
+//               style: TextStyle(
+//                 color: isActive ? AppColors.kPrimaryColour : Colors.white60,
+//                 fontWeight: FontWeight.w600,
+//                 fontSize: 14,
+//               ),
+//             ),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }

@@ -6,7 +6,6 @@ enum CameraRatio { oneOne, fourThree, sixteenNine, full }
 /// Manages camera settings, UI states, and quick settings overlay
 class SettingsController extends ChangeNotifier {
   // -------------------- Quick Toggles --------------------
-  bool gridLines = true;
   bool level = true;
   bool watermark = false;
   bool hdr = true;
@@ -32,12 +31,7 @@ class SettingsController extends ChangeNotifier {
 
   // -------------------- Ratio & Timer --------------------
 
-  /// Toggles grid overlay
-  void toggleGridLines() {
-    gridLines = !gridLines;
-    notifyListeners();
-  }
-
+ 
   /// Toggles level indicator
   void toggleLevel() {
     level = !level;
