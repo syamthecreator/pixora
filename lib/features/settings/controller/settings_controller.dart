@@ -31,7 +31,6 @@ class SettingsController extends ChangeNotifier {
 
   // -------------------- Ratio & Timer --------------------
 
- 
   /// Toggles level indicator
   void toggleLevel() {
     level = !level;
