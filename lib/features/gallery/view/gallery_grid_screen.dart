@@ -27,14 +27,14 @@ class _GalleryGridView extends StatelessWidget {
     final controller = context.watch<GalleryController>();
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.kSecondaryColour,
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: AppColors.kSecondaryColour,
         automaticallyImplyLeading: false,
         title: Row(
           children: [
             IconButton(
-              icon: Icon(Icons.arrow_back_ios, color: AppColors.white),
+              icon: Icon(Icons.arrow_back_ios, color: AppColors.kWhiteColour),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
               onPressed: () => Navigator.pop(context),
@@ -47,7 +47,7 @@ class _GalleryGridView extends StatelessWidget {
 
       body: controller.isLoading
           ? Center(
-              child: CircularProgressIndicator(color: AppColors.neonPurple),
+              child: CircularProgressIndicator(color: AppColors.kPrimaryColour),
             )
           : controller.media.isEmpty
           ? const _EmptyGallery()

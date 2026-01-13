@@ -37,13 +37,13 @@ class WelcomeContentSection extends StatelessWidget {
   // ───────────────────────── Styles ─────────────────────────
 
   TextStyle get _titleStyle => const TextStyle(
-    color: AppColors.white,
+    color: AppColors.kWhiteColour,
     fontSize: 34,
     fontWeight: FontWeight.w600,
   );
 
   TextStyle get _subtitleStyle => TextStyle(
-    color: AppColors.white.withValues(alpha: 0.7),
+    color: AppColors.kWhiteColour.withValues(alpha: 0.7),
     fontSize: 15,
     height: 1.4,
   );

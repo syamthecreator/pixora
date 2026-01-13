@@ -14,7 +14,7 @@ class SettingsFooter extends StatelessWidget {
       child: Center(
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.neonPurple.withValues(alpha: 0.18),
+            backgroundColor: AppColors.kPrimaryColour.withValues(alpha: 0.18),
             padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(30),
@@ -25,7 +25,7 @@ class SettingsFooter extends StatelessWidget {
           },
           child: Text(
             "Restore defaults",
-            style: TextStyle(color: AppColors.neonPurple),
+            style: TextStyle(color: AppColors.kPrimaryColour),
           ),
         ),
       ),

@@ -53,9 +53,9 @@ class SettingsSwitchTile extends StatelessWidget {
             /// Track fill color
             trackColor: WidgetStateProperty.resolveWith((states) {
               if (states.contains(WidgetState.selected)) {
-                return AppColors.neonPurple.withValues(alpha: 0.18);
+                return AppColors.kPrimaryColour.withValues(alpha: 0.18);
               }
-              return AppColors.inactiveOption;
+              return AppColors.kInactiveOptionColour;
             }),
 
             /// Track border
@@ -63,7 +63,7 @@ class SettingsSwitchTile extends StatelessWidget {
               if (states.contains(WidgetState.selected)) {
                 return Colors.transparent;
               }
-              return AppColors.inactiveOption;
+              return AppColors.kInactiveOptionColour;
             }),
 
             trackOutlineWidth: WidgetStateProperty.all(1.5),
@@ -71,7 +71,7 @@ class SettingsSwitchTile extends StatelessWidget {
             /// Thumb color
             thumbColor: WidgetStateProperty.resolveWith((states) {
               if (states.contains(WidgetState.selected)) {
-                return AppColors.neonPurple;
+                return AppColors.kPrimaryColour;
               }
               return Colors.white24;
             }),

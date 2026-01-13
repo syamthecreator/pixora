@@ -3,10 +3,7 @@ import 'package:flutter/material.dart';
 class SettingsTopBar extends StatelessWidget {
   final String title;
 
-  const SettingsTopBar({
-    super.key,
-    this.title = "More settings",
-  });
+  const SettingsTopBar({super.key, this.title = "More settings"});
 
   @override
   Widget build(BuildContext context) {
@@ -25,10 +22,7 @@ class SettingsTopBar extends StatelessWidget {
           /// TITLE
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
           ),
         ],
       ),

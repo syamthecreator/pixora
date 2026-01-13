@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pixora/core/theme/app_colors.dart';
 
 class CameraFlashOverlay extends StatefulWidget {
   const CameraFlashOverlay({super.key});
@@ -40,7 +41,7 @@ class CameraFlashOverlayState extends State<CameraFlashOverlay>
         builder: (_, _) {
           return Opacity(
             opacity: _controller.value,
-            child: Container(color: Colors.white),
+            child: Container(color: AppColors.kWhiteColour),
           );
         },
       ),

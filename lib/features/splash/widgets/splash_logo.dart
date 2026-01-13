@@ -29,7 +29,7 @@ class SplashLogo extends StatelessWidget {
                 colors: [
                   AppColors.neonCyan,
                   AppColors.electricBlue,
-                  AppColors.neonPurple,
+                  AppColors.kPrimaryColour,
                   AppColors.neonCyan,
                 ],
               ),
@@ -48,7 +48,7 @@ class SplashLogo extends StatelessWidget {
               gradient: RadialGradient(
                 colors: [
                   AppColors.neonCyan,
-                  AppColors.neonPurple,
+                  AppColors.kPrimaryColour,
                 ],
               ),
             ),

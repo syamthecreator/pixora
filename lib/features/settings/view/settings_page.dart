@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pixora/core/theme/app_colors.dart';
 import 'package:pixora/features/settings/widgets/settings_footer.dart';
 import 'package:pixora/features/settings/widgets/settings_section.dart';
 import 'package:pixora/features/settings/widgets/settings_switch_tile.dart';
@@ -10,7 +11,7 @@ class CameraSettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.kSecondaryColour,
       body: SafeArea(
         child: Column(
           children: [
@@ -87,7 +88,7 @@ class CameraSettingsPage extends StatelessWidget {
                         defaultValue: false,
                       ),
                       SettingsSwitchTile(
-                        title: "Lock white balance",
+                        title: "Lock kWhiteColour balance",
                         settingKey: "lock_wb",
                       ),
                     ],

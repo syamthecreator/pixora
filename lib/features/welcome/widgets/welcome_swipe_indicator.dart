@@ -70,7 +70,7 @@ class WelcomeSwipeIndicator extends StatelessWidget {
       opacity: opacity,
       child: const Padding(
         padding: EdgeInsets.symmetric(horizontal: 1),
-        child: Icon(Icons.arrow_back_ios, size: 18, color: AppColors.white),
+        child: Icon(Icons.arrow_back_ios, size: 18, color: AppColors.kWhiteColour),
       ),
     );
   }
@@ -83,14 +83,14 @@ class WelcomeSwipeIndicator extends StatelessWidget {
   // ───────────────────────── Styles ─────────────────────────
 
   TextStyle get _textStyle => TextStyle(
-    color: AppColors.white.withValues(alpha: 0.85),
+    color: AppColors.kWhiteColour.withValues(alpha: 0.85),
     fontSize: 20,
     height: 1.0,
     letterSpacing: 1.2,
     fontWeight: FontWeight.w600,
     shadows: [
       Shadow(
-        color: AppColors.neonPurple.withValues(alpha: 0.6),
+        color: AppColors.kPrimaryColour.withValues(alpha: 0.6),
         blurRadius: 12,
       ),
     ],

@@ -39,14 +39,14 @@ class CameraModeButton extends StatelessWidget {
   BoxDecoration _buildDecoration() {
     return BoxDecoration(
       color: isActive
-          ? AppColors.neonPurple.withValues(alpha: 0.18)
+          ? AppColors.kPrimaryColour.withValues(alpha: 0.18)
           : Colors.transparent,
       borderRadius: BorderRadius.circular(20),
     );
   }
 
   Color _getIconColor() {
-    return isActive ? AppColors.neonPurple : Colors.white54;
+    return isActive ? AppColors.kPrimaryColour : Colors.white54;
   }
 
   TextStyle _getTextStyle() {

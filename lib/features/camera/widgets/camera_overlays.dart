@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:pixora/core/theme/app_colors.dart';
 
 enum CameraOverlayType { glassContainer, glassIcon }
 
@@ -22,7 +23,7 @@ class CameraOverlayWidget extends StatelessWidget {
     this.onTap,
     this.size = 18.0,
     this.iconColor = Colors.white,
-    this.backgroundColor = Colors.black,
+    this.backgroundColor = AppColors.kSecondaryColour,
     this.blurSigma = 14.0,
     this.borderRadius = 20.0,
     this.padding = EdgeInsets.zero,
@@ -34,7 +35,7 @@ class CameraOverlayWidget extends StatelessWidget {
     required Widget child,
     double borderRadius = 20.0,
     EdgeInsetsGeometry padding = EdgeInsets.zero,
-    Color backgroundColor = Colors.black,
+    Color backgroundColor = AppColors.kSecondaryColour,
     double blurSigma = 14.0,
   }) {
     return CameraOverlayWidget._(
@@ -53,8 +54,8 @@ class CameraOverlayWidget extends StatelessWidget {
     required IconData icon,
     VoidCallback? onTap,
     double size = 18.0,
-    Color iconColor = Colors.white,
-    Color backgroundColor = Colors.black,
+    Color iconColor = AppColors.kWhiteColour,
+    Color backgroundColor = AppColors.kSecondaryColour,
     double blurSigma = 14.0,
   }) {
     return CameraOverlayWidget._(

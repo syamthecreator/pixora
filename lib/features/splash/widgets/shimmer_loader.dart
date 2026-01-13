@@ -44,10 +44,10 @@ class _DotLoaderState extends State<DotLoader>
             height: widget.dotSize,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.neonPurple,
+              color: AppColors.kPrimaryColour,
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.neonPurple.withValues(alpha: 0.3),
+                  color: AppColors.kPrimaryColour.withValues(alpha: 0.3),
                   blurRadius: 6,
                 ),
               ],

@@ -122,8 +122,8 @@ class _RecordingTimer extends StatelessWidget {
                 const SizedBox(width: 6),
                 Text(
                   time,
-                  style: const TextStyle(
-                    color: AppColors.white,
+                  style: TextStyle(
+                    color: AppColors.kWhiteColour,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 1.2,
@@ -251,7 +251,9 @@ class _MiddleRing extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
-          color: isPhoto ? AppColors.neonPurple : Colors.black,
+          color: isPhoto
+              ? AppColors.kPrimaryColour
+              : AppColors.kSecondaryColour,
           width: 3,
         ),
       ),

@@ -19,10 +19,7 @@ class SettingsSection extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
           child: Text(
             title,
-            style: const TextStyle(
-              fontSize: 13,
-              color: Colors.white54,
-            ),
+            style: TextStyle(fontSize: 13, color: Colors.white54),
           ),
         ),
         ...children,

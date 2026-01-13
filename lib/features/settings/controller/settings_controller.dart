@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pixora/core/theme/app_colors.dart';
 import 'package:pixora/features/camera/widgets/quick_settings_sheet.dart';
 import 'package:pixora/core/routes/app_routes.dart';
 
@@ -74,7 +75,7 @@ class SettingsController extends ChangeNotifier {
       context: context,
       barrierLabel: "QuickSettings",
       barrierDismissible: true,
-      barrierColor: Colors.black.withAlpha(
+      barrierColor: AppColors.kSecondaryColour.withAlpha(
         (255 * _quickSettingsBarrierOpacity).toInt(),
       ),
       transitionDuration: _quickSettingsAnimationDuration,

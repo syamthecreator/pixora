@@ -80,7 +80,7 @@ class _CameraScreenState extends State<CameraScreen>
     final settings = context.watch<SettingsController>();
 
     return Scaffold(
-      backgroundColor: AppColors.black,
+      backgroundColor: AppColors.kSecondaryColour,
       body: Stack(
         children: [
           // 🔥 CAMERA PREVIEW
@@ -111,7 +111,7 @@ class _CameraScreenState extends State<CameraScreen>
             child: Container(
               padding: const EdgeInsets.all(10),
               decoration: const BoxDecoration(
-                color: AppColors.black,
+                color: AppColors.kSecondaryColour,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
               ),
               child: const CameraBottomBar(),

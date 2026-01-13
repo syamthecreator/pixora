@@ -67,7 +67,7 @@ class _GalleryVideoPlayerState extends State<GalleryVideoPlayer> {
     if (!_controller.value.isInitialized) {
       return Center(
         child: CircularProgressIndicator(
-          color: AppColors.neonPurple,
+          color: AppColors.kPrimaryColour,
         ),
       );
     }
@@ -86,14 +86,14 @@ class _GalleryVideoPlayerState extends State<GalleryVideoPlayer> {
           // ▶️ SHOW ICON WHEN PAUSED OR COMPLETED
           if (!galleryController.isVideoPlaying)
             Container(
-              decoration: const BoxDecoration(
-                color: Colors.black45,
+              decoration:  BoxDecoration(
+                color: AppColors.kSecondaryColour,
                 shape: BoxShape.circle,
               ),
               padding: const EdgeInsets.all(20),
               child: const Icon(
                 Icons.play_arrow,
-                color: Colors.white,
+                color: AppColors.kWhiteColour,
                 size: 60,
               ),
             ),

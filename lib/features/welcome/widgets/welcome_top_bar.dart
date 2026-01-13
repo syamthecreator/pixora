@@ -66,7 +66,7 @@ class WelcomeTopBar extends StatelessWidget {
       height: 6,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: AppColors.white.withValues(
+        color: AppColors.kWhiteColour.withValues(
           alpha: index == 1 ? 0.8 : 0.4,
         ),
       ),
@@ -83,14 +83,14 @@ class WelcomeTopBar extends StatelessWidget {
       );
 
   TextStyle get _logoTextStyle => TextStyle(
-        color: AppColors.white.withValues(alpha: 0.85),
+        color: AppColors.kWhiteColour.withValues(alpha: 0.85),
         fontSize: 18,
         letterSpacing: 2.5,
         fontWeight: FontWeight.w600,
       );
 
   TextStyle get _taglineStyle => TextStyle(
-        color: AppColors.white.withValues(alpha: 0.55),
+        color: AppColors.kWhiteColour.withValues(alpha: 0.55),
         fontSize: 12,
         letterSpacing: 1.2,
       );

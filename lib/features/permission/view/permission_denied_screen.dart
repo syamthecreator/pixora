@@ -31,22 +31,22 @@ class _PermissionDeniedScreenState extends State<PermissionDeniedScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.kSecondaryColour,
       body: Center(
         child: Container(
           margin: const EdgeInsets.all(24),
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: const Color(0xFF2B2B2B),
+            color: AppColors.kPrimaryColour.withValues(alpha: 0.18),
             borderRadius: BorderRadius.circular(24),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
+              Text(
                 "Permission request",
                 style: TextStyle(
-                  color: AppColors.white,
+                  color: AppColors.kWhiteColour,
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                 ),
@@ -68,7 +68,7 @@ class _PermissionDeniedScreenState extends State<PermissionDeniedScreen> {
                       },
                       child: Text(
                         "Cancel",
-                        style: TextStyle(color: AppColors.kAccentYellow),
+                        style: TextStyle(color: AppColors.kPrimaryColour),
                       ),
                     ),
                   ),
@@ -79,7 +79,7 @@ class _PermissionDeniedScreenState extends State<PermissionDeniedScreen> {
                       },
                       child: Text(
                         "Settings",
-                        style: TextStyle(color: AppColors.kAccentYellow),
+                        style: TextStyle(color: AppColors.kPrimaryColour),
                       ),
                     ),
                   ),

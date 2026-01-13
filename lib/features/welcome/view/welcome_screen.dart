@@ -63,8 +63,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            Colors.black.withValues(alpha: 0.15),
-            Colors.black.withValues(alpha: 0.35),
+            AppColors.kSecondaryColour.withValues(alpha: 0.15),
+            AppColors.kSecondaryColour.withValues(alpha: 0.35),
           ],
         ),
       ),
@@ -121,15 +121,15 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   }
 
   BoxDecoration get _glassDecoration => BoxDecoration(
-    color: AppColors.neonPurple.withValues(alpha: 0.10),
+    color: AppColors.kPrimaryColour.withValues(alpha: 0.10),
     borderRadius: BorderRadius.circular(32),
     border: Border.all(
-      color: AppColors.neonPurple.withValues(alpha: 0.35),
+      color: AppColors.kPrimaryColour.withValues(alpha: 0.35),
       width: 1,
     ),
     boxShadow: [
       BoxShadow(
-        color: AppColors.neonPurple.withValues(alpha: 0.18),
+        color: AppColors.kPrimaryColour.withValues(alpha: 0.18),
         blurRadius: 24,
         spreadRadius: 2,
       ),

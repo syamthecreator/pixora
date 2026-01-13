@@ -53,7 +53,7 @@ class _HeaderSection extends StatelessWidget {
     return Row(
       children: [
         IconButton(
-          icon: const Icon(Icons.close, color: Colors.white),
+          icon: Icon(Icons.close, color: AppColors.kWhiteColour),
           onPressed: onClose,
         ),
         const Spacer(),
@@ -76,13 +76,13 @@ class _MoreSettingsButton extends StatelessWidget {
           Text(
             "More settings",
             style: TextStyle(
-              color: AppColors.white,
+              color: AppColors.kWhiteColour,
               fontWeight: FontWeight.w600,
               fontSize: 14,
             ),
           ),
           const SizedBox(width: 4),
-          Icon(Icons.chevron_right, color: AppColors.white, size: 22),
+          Icon(Icons.chevron_right, color: AppColors.kWhiteColour, size: 22),
         ],
       ),
     );
@@ -95,7 +95,6 @@ class _RatioSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      
       listenable: controller,
       builder: (context, _) {
         return _SettingsOptionRow(
@@ -209,15 +208,15 @@ class _OptionTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
           color: isActive
-              ? AppColors.neonPurple.withValues(alpha: 0.18)
-              : AppColors.inactiveOption,
+              ? AppColors.kPrimaryColour.withValues(alpha: 0.18)
+              : AppColors.kInactiveOptionColour,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Center(
           child: Text(
             label,
             style: TextStyle(
-              color: isActive ? AppColors.neonPurple : Colors.white60,
+              color: isActive ? AppColors.kPrimaryColour : Colors.white60,
               fontWeight: FontWeight.w600,
               fontSize: 14,
             ),
@@ -249,15 +248,15 @@ class _ToggleTile extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 14),
           decoration: BoxDecoration(
             color: isActive
-                ? AppColors.neonPurple.withValues(alpha: 0.18)
-                : AppColors.inactiveOption,
+                ? AppColors.kPrimaryColour.withValues(alpha: 0.18)
+                : AppColors.kInactiveOptionColour,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Center(
             child: Text(
               label,
               style: TextStyle(
-                color: isActive ? AppColors.neonPurple : Colors.white60,
+                color: isActive ? AppColors.kPrimaryColour : Colors.white60,
                 fontWeight: FontWeight.w600,
                 fontSize: 14,
               ),

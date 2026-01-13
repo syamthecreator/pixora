@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:pixora/core/theme/app_colors.dart';
 import 'package:video_player/video_player.dart';
 
 class GalleryVideoThumbnail extends StatefulWidget {
@@ -35,11 +36,9 @@ class _GalleryVideoThumbnailState extends State<GalleryVideoThumbnail> {
   @override
   Widget build(BuildContext context) {
     if (!_controller.value.isInitialized) {
-      return const ColoredBox(
-        color: Colors.black,
-        child: Center(
-          child: Icon(Icons.videocam, color: Colors.white70),
-        ),
+      return ColoredBox(
+        color: AppColors.kSecondaryColour,
+        child: Center(child: Icon(Icons.videocam, color: Colors.white70)),
       );
     }
 
@@ -57,11 +56,7 @@ class _GalleryVideoThumbnailState extends State<GalleryVideoThumbnail> {
 
         // ▶️ Play icon overlay
         const Center(
-          child: Icon(
-            Icons.play_circle_fill,
-            color: Colors.white,
-            size: 36,
-          ),
+          child: Icon(Icons.play_circle_fill, color: AppColors.kWhiteColour, size: 36),
         ),
       ],
     );

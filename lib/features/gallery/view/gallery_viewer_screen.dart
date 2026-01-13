@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pixora/core/theme/app_colors.dart';
 import 'package:provider/provider.dart';
 import '../controller/gallery_controller.dart';
 import '../widgets/delete_fab.dart';
@@ -34,16 +35,19 @@ class _GalleryViewerScreenState extends State<GalleryViewerScreen> {
     final media = controller.media;
 
     if (media.isEmpty) {
-      return const Scaffold(
-        backgroundColor: Colors.black,
+      return Scaffold(
+        backgroundColor: AppColors.kSecondaryColour,
         body: Center(
-          child: Text('No media', style: TextStyle(color: Colors.white)),
+          child: Text(
+            'No media',
+            style: TextStyle(color: AppColors.kWhiteColour),
+          ),
         ),
       );
     }
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.kSecondaryColour,
       body: SafeArea(
         child: Stack(
           children: [
@@ -61,12 +65,12 @@ class _GalleryViewerScreenState extends State<GalleryViewerScreen> {
               left: 0,
               right: 0,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                decoration: const BoxDecoration(
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [Colors.black87, Colors.transparent],
+                    colors: [AppColors.kSecondaryColour, Colors.transparent],
                   ),
                 ),
                 child: Row(
@@ -74,7 +78,7 @@ class _GalleryViewerScreenState extends State<GalleryViewerScreen> {
                     IconButton(
                       icon: const Icon(
                         Icons.arrow_back_ios,
-                        color: Colors.white,
+                        color: AppColors.kWhiteColour,
                       ),
                       onPressed: () => Navigator.pop(context),
                     ),
@@ -84,8 +88,8 @@ class _GalleryViewerScreenState extends State<GalleryViewerScreen> {
                         fileName(media[_currentIndex].file.path),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: AppColors.kWhiteColour,
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
                         ),
