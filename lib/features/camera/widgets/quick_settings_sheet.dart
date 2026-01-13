@@ -35,7 +35,7 @@ class QuickSettingsSheet extends StatelessWidget {
           children: [
             _HeaderSection(onClose: onClose, onMoreSettings: onMoreSettings),
             const SizedBox(height: 20),
-            _RatioSection(controller: settingsController),
+            _RatioSection(controller: cameraControllerX),
             const SizedBox(height: 14),
             _TimerSection(controller: cameraControllerX),
             const SizedBox(height: 14),
@@ -93,8 +93,9 @@ class _MoreSettingsButton extends StatelessWidget {
 }
 
 class _RatioSection extends StatelessWidget {
-  final SettingsController controller;
+  final CameraControllerX controller;
   const _RatioSection({required this.controller});
+
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -103,7 +104,10 @@ class _RatioSection extends StatelessWidget {
         return _SettingsOptionRow(
           items: controller.availableRatios,
           selectedIndex: controller.getRatioIndex(),
-          onItemSelected: controller.selectRatio,
+          onItemSelected: (ratio) {
+            controller.selectRatio(ratio);
+            controller.updateRatio(ratio); // 🔥 LINKED
+          },
         );
       },
     );

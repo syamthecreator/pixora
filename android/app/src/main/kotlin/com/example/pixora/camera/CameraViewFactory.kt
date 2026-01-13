@@ -19,26 +19,30 @@ class CameraViewFactory(
     private val TAG = "PixoraCameraView"
 
     override fun create(context: Context, viewId: Int, args: Any?): PlatformView {
-        Log.d(TAG, "Creating Camera PlatformView. viewId=$viewId args=$args")
+        // ✅ READ ratio from Flutter creationParams
+        val params = args as? Map<*, *>
+        val ratio = params?.get("ratio") as? String ?: "4:3"
+
+        Log.d(TAG, "Creating Camera PlatformView. viewId=$viewId ratio=$ratio")
 
         return object : PlatformView {
 
-            // 🔥 REPLACED PreviewView WITH GPUImageView (REQUIRED)
+            // 🔥 GPUImageView as preview
             private val gpuImageView = GPUImageView(context).apply {
-        layoutParams = android.view.ViewGroup.LayoutParams(
-            android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-            android.view.ViewGroup.LayoutParams.MATCH_PARENT
-        )
-    }
-
+                layoutParams = android.view.ViewGroup.LayoutParams(
+                    android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                    android.view.ViewGroup.LayoutParams.MATCH_PARENT
+                )
+            }
 
             init {
                 Log.d(TAG, "Initializing CameraController")
 
-                // 🔥 PASS GPUImageView TO CONTROLLER
+                // ✅ CORRECT constructor call
                 cameraController = CameraController(
-                    context,
-                    gpuImageView
+                    context = context,
+                    gpuImageView = gpuImageView,
+                    ratio = ratio
                 )
 
                 Log.d(TAG, "Starting camera from PlatformView")
@@ -49,6 +53,7 @@ class CameraViewFactory(
 
             override fun dispose() {
                 Log.d(TAG, "Disposing Camera PlatformView")
+                cameraController.cleanup() // 🔥 use cleanup, not stopCamera
             }
         }
     }

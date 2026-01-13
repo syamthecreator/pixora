@@ -17,9 +17,12 @@ import java.io.ByteArrayOutputStream
 import android.view.Surface
 
 
+
+
 class CameraController(
     private val context: Context,
-    private val gpuImageView: GPUImageView
+    private val gpuImageView: GPUImageView,
+    private val ratio: String
 ) {
 
     companion object {
@@ -64,8 +67,10 @@ class CameraController(
 
             // -------- LIVE FILTER PREVIEW --------
             imageAnalysis = ImageAnalysis.Builder()
-                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                .build()
+            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+            .setTargetAspectRatio(cameraAspectRatio()) // ✅ ADD
+            .build()
+
 
             imageAnalysis!!.setAnalyzer(
                 ContextCompat.getMainExecutor(context)
@@ -93,10 +98,12 @@ class CameraController(
                 ?: Surface.ROTATION_0
 
             imageCapture = ImageCapture.Builder()
-                .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
-                .setFlashMode(ImageCapture.FLASH_MODE_OFF)
-                .setTargetRotation(rotation)
-                .build()
+            .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+            .setFlashMode(ImageCapture.FLASH_MODE_OFF)
+            .setTargetRotation(rotation)
+            .setTargetAspectRatio(cameraAspectRatio()) // ✅ ADD
+            .build()
+
 
 
             // -------- VIDEO --------
@@ -114,16 +121,43 @@ class CameraController(
             cameraProvider?.unbindAll()
 
             camera = cameraProvider?.bindToLifecycle(
-                lifecycleOwner,
-                selector,
-                imageAnalysis,
-                imageCapture,
-                videoCapture
-            )
-
-            Log.d(TAG, "Camera bound with LIVE GPUImage filter preview")
-
+            lifecycleOwner,
+            selector,
+            imageAnalysis,
+            imageCapture,
+            videoCapture
+        )
+        applyPreviewCrop()
+        Log.d(TAG, "Camera bound with LIVE GPUImage filter preview")
         }, ContextCompat.getMainExecutor(context))
+            }
+
+    private fun cameraAspectRatio(): Int {
+        return when (ratio) {
+            "16:9" -> AspectRatio.RATIO_16_9
+            else -> AspectRatio.RATIO_4_3
+        }
+    }
+
+
+    private fun applyPreviewCrop() {
+        when (ratio) {
+            "full" -> {
+                gpuImageView.setScaleType(GPUImage.ScaleType.CENTER_CROP)
+            }
+
+            "16:9", "4:3" -> {
+                gpuImageView.setScaleType(GPUImage.ScaleType.CENTER_INSIDE)
+            }
+        }
+    }
+
+    private fun cropSquareCenter(bitmap: Bitmap): Bitmap {
+        val size = minOf(bitmap.width, bitmap.height)
+        val x = (bitmap.width - size) / 2
+        val y = (bitmap.height - size) / 2
+
+        return Bitmap.createBitmap(bitmap, x, y, size, size)
     }
 
     // ---------------- FILTER CONTROL ----------------
@@ -191,24 +225,25 @@ class CameraController(
 
     // ---------------- PHOTO ----------------
 
-    fun takePhoto(
-    flashMode: String,
-    onResult: (String?) -> Unit
-) {
-    Log.d(TAG, "takePhoto() using GPUImage filtered bitmap")
+        fun takePhoto(
+        flashMode: String,
+        onResult: (String?) -> Unit
+    ) {
+        Log.d(TAG, "takePhoto() using GPUImage filtered bitmap")
 
-    // 🔥 CAPTURE FILTERED FRAME FROM GPUImageView
-    val filteredBitmap = gpuImageView.capture()
+        // 🔥 CAPTURE FILTERED FRAME FROM GPUImageView
+        val filteredBitmap = gpuImageView.capture()
+        ?: run {
+            onResult(null)
+            return
+        }
 
-    if (filteredBitmap == null) {
-        Log.e(TAG, "Failed to capture filtered bitmap")
-        onResult(null)
-        return
+        val finalBitmap =
+        if (ratio == "1:1") cropSquareCenter(filteredBitmap)
+        else filteredBitmap
+
+    saveFilteredBitmap(finalBitmap, onResult)
     }
-
-    saveFilteredBitmap(filteredBitmap, onResult)
-}
-
 
     // ---------------- VIDEO ----------------
 

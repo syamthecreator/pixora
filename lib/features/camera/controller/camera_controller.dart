@@ -41,6 +41,12 @@ class CameraControllerX extends ChangeNotifier {
   List<String> get availableTimers => _availableTimers;
   String selectedTimer = "Off";
 
+  static const List<String> _availableRatios = ["4:3", "16:9", "Full"];
+  List<String> get availableRatios => _availableRatios;
+  String selectedRatio = "4:3";
+    String get _selectedRatio => selectedRatio;
+
+
   bool _showCountdown = false;
   int _countdown = 0;
 
@@ -66,6 +72,9 @@ class CameraControllerX extends ChangeNotifier {
 
   // -------------------- Helpers --------------------
   int getTimerIndex() => _availableTimers.indexOf(selectedTimer);
+
+  /// Returns selected ratio index
+  int getRatioIndex() => _availableRatios.indexOf(selectedRatio);
 
   bool get isPhotoMode => selectedMode == CameraModes.photo.index;
   bool get isVideoMode => selectedMode == CameraModes.video.index;
@@ -367,6 +376,28 @@ class CameraControllerX extends ChangeNotifier {
   void moreSettings(BuildContext context) {
     Navigator.of(context).pop();
     Navigator.of(context).pushNamed(AppRoutes.settingsScreen);
+  }
+
+  /// Used to force AndroidView rebuild
+
+
+  void updateRatio(String ratio) {
+    if (_selectedRatio == ratio) return;
+
+    selectedRatio = ratio;
+
+    /// 🔥 Force AndroidView recreation
+    _previewKey++;
+
+    notifyListeners();
+  }
+
+  /// Updates selected aspect ratio
+  void selectRatio(String ratio) {
+    if (selectedRatio != ratio) {
+      selectedRatio = ratio;
+      notifyListeners();
+    }
   }
 
   // -------------------- Cleanup --------------------

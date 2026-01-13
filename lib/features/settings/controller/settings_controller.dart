@@ -5,10 +5,6 @@ enum CameraRatio { oneOne, fourThree, sixteenNine, full }
 
 /// Manages camera settings, UI states, and quick settings overlay
 class SettingsController extends ChangeNotifier {
-  // -------------------- Constants --------------------
-  static const List<String> _availableRatios = ["1:1", "4:3", "16:9", "Full"];
-  List<String> get availableRatios => _availableRatios;
-
   // -------------------- Quick Toggles --------------------
   bool gridLines = true;
   bool level = true;
@@ -35,18 +31,6 @@ class SettingsController extends ChangeNotifier {
   }
 
   // -------------------- Ratio & Timer --------------------
-  String selectedRatio = "Full";
-
-  /// Updates selected aspect ratio
-  void selectRatio(String ratio) {
-    if (selectedRatio != ratio) {
-      selectedRatio = ratio;
-      notifyListeners();
-    }
-  }
-
-  /// Returns selected ratio index
-  int getRatioIndex() => _availableRatios.indexOf(selectedRatio);
 
   /// Toggles grid overlay
   void toggleGridLines() {
