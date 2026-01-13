@@ -15,14 +15,18 @@ class CameraTopBar extends StatelessWidget {
     final controller = context.watch<CameraControllerX>();
 
     return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildModeSelector(context),
+  child: Padding(
+    padding: const EdgeInsets.all(12),
+    child: Row(
+      children: [
+        /// LEFT: MODE SELECTOR
+        _buildModeSelector(context),
 
-            /// FLASH (OFF → ON → AUTO)
+        const Spacer(),
+
+        /// RIGHT: FLASH + SETTINGS
+        Row(
+          children: [
             if (!controller.isFrontCamera)
               GestureDetector(
                 onTap: controller.toggleFlashMode,
@@ -31,15 +35,21 @@ class CameraTopBar extends StatelessWidget {
                 ),
               ),
 
-            /// SETTINGS
+            const SizedBox(width: 12),
+
             GestureDetector(
               onTap: onTapSettingsIcon,
-              child: CameraOverlayWidget.glassIcon(icon: Icons.settings),
+              child: CameraOverlayWidget.glassIcon(
+                icon: Icons.settings,
+              ),
             ),
           ],
         ),
-      ),
-    );
+      ],
+    ),
+  ),
+);
+
   }
 
   Widget _buildModeSelector(BuildContext context) {

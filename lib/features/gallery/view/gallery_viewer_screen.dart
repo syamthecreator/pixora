@@ -103,6 +103,13 @@ class _GalleryViewerScreenState extends State<GalleryViewerScreen> {
               isDeleting: controller.isDeleting,
               color: Colors.red,
               onPressed: () async {
+                final controller = context.read<GalleryController>();
+
+                final shouldDelete = await controller.showDeleteConfirmation(
+                  context,
+                );
+                if (!shouldDelete) return;
+
                 final nextIndex = await controller.deleteAndResolveIndex(
                   _currentIndex,
                 );

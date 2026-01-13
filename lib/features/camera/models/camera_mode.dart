@@ -30,10 +30,10 @@ class CameraModes {
   static final List<CameraMode> all = [
     CameraMode(icon: Icons.photo_camera, label: "PHOTO", index: 0),
     CameraMode(icon: Icons.videocam, label: "VIDEO", index: 1),
-    CameraMode(icon: Icons.slow_motion_video, label: "SLOW", index: 2),
+    // CameraMode(icon: Icons.slow_motion_video, label: "SLOW", index: 2),
   ];
 
   static CameraMode get photo => all[0];
   static CameraMode get video => all[1];
-  static CameraMode get slowMotion => all[2];
+  // static CameraMode get slowMotion => all[2];
 }

@@ -192,55 +192,23 @@ class CameraController(
     // ---------------- PHOTO ----------------
 
     fun takePhoto(
-        flashMode: String,
-        onResult: (String?) -> Unit
-    ) {
-        Log.d(TAG, "takePhoto() called with flashMode=$flashMode")
+    flashMode: String,
+    onResult: (String?) -> Unit
+) {
+    Log.d(TAG, "takePhoto() using GPUImage filtered bitmap")
 
-        val capture = imageCapture ?: return
+    // 🔥 CAPTURE FILTERED FRAME FROM GPUImageView
+    val filteredBitmap = gpuImageView.capture()
 
-            capture.targetRotation =
-                gpuImageView.display?.rotation
-                    ?: context.display?.rotation
-                    ?: Surface.ROTATION_0
-
-        val fileName = "IMG_${System.currentTimeMillis()}"
-
-        val contentValues = ContentValues().apply {
-            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
-            put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-            put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/Pixora")
-        }
-
-        val outputOptions = ImageCapture.OutputFileOptions.Builder(
-            context.contentResolver,
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-            contentValues
-        ).build()
-
-        capture.takePicture(
-            outputOptions,
-            ContextCompat.getMainExecutor(context),
-            object : ImageCapture.OnImageSavedCallback {
-
-                override fun onImageSaved(result: ImageCapture.OutputFileResults) {
-                    val uri = result.savedUri
-                    Log.d(TAG, "Photo saved: $uri")
-
-                    if (lensFacing == CameraSelector.LENS_FACING_FRONT && uri != null) {
-                        mirrorSavedImage(uri)
-                    }
-
-                    onResult(uri?.toString())
-                }
-
-                override fun onError(exception: ImageCaptureException) {
-                    Log.e(TAG, "Photo capture failed", exception)
-                    onResult(null)
-                }
-            }
-        )
+    if (filteredBitmap == null) {
+        Log.e(TAG, "Failed to capture filtered bitmap")
+        onResult(null)
+        return
     }
+
+    saveFilteredBitmap(filteredBitmap, onResult)
+}
+
 
     // ---------------- VIDEO ----------------
 
@@ -340,6 +308,33 @@ class CameraController(
             Log.e(TAG, "Failed to mirror saved image", e)
         }
     }
+
+    private fun saveFilteredBitmap(bitmap: Bitmap, onResult: (String?) -> Unit) {
+    val fileName = "IMG_${System.currentTimeMillis()}"
+
+    val contentValues = ContentValues().apply {
+        put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+        put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+        put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/Pixora")
+    }
+
+    val uri = context.contentResolver.insert(
+        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+        contentValues
+    )
+
+    if (uri == null) {
+        onResult(null)
+        return
+    }
+
+    context.contentResolver.openOutputStream(uri)?.use {
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 95, it)
+    }
+
+    onResult(uri.toString())
+}
+
 }
 
 // ---------------- IMAGE EXTENSION ----------------

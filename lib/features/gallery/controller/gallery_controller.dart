@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:pixora/features/gallery/widgets/confirm_delete_dialog.dart';
 import '../models/media_item.dart';
 import '../models/media_type.dart';
 
@@ -25,76 +26,75 @@ class GalleryController extends ChangeNotifier {
   // 🚀 FAST ASYNC MEDIA LOADER (NO UI BLOCKING)
   // ==========================================================
 
- Future<void> loadMedia() async {
-  if (_isLoading) {
-    debugPrint("⏸️ Gallery already loading, skipping");
-    return;
-  }
-
-  debugPrint("🔄 Gallery load started");
-
-  _isLoading = true;
-  notifyListeners();
-
-  _media.clear();
-
-  try {
-    final List<_MediaWithTime> temp = [];
-
-    // 📸 IMAGES
-    final imageDir = Directory(DirectoryView.imageDir);
-    debugPrint("📂 Checking image dir: ${imageDir.path}");
-
-    if (await imageDir.exists()) {
-      await for (final entity in imageDir.list(followLinks: false)) {
-        if (entity is File && _isImage(entity.path)) {
-          final stat = await entity.stat();
-
-          debugPrint("🖼️ Found image: ${entity.path}");
-
-          temp.add(
-            _MediaWithTime(
-              item: MediaItem(file: entity, type: MediaType.image),
-              time: stat.modified,
-            ),
-          );
-        }
-      }
+  Future<void> loadMedia() async {
+    if (_isLoading) {
+      debugPrint("⏸️ Gallery already loading, skipping");
+      return;
     }
 
-    // 🎥 VIDEOS
-    final videoDir = Directory(DirectoryView.videoDir);
-    debugPrint("📂 Checking video dir: ${videoDir.path}");
+    debugPrint("🔄 Gallery load started");
 
-    if (await videoDir.exists()) {
-      await for (final entity in videoDir.list(followLinks: false)) {
-        if (entity is File && _isVideo(entity.path)) {
-          final stat = await entity.stat();
+    _isLoading = true;
+    notifyListeners();
 
-          debugPrint("🎞️ Found video: ${entity.path}");
+    _media.clear();
 
-          temp.add(
-            _MediaWithTime(
-              item: MediaItem(file: entity, type: MediaType.video),
-              time: stat.modified,
-            ),
-          );
+    try {
+      final List<_MediaWithTime> temp = [];
+
+      // 📸 IMAGES
+      final imageDir = Directory(DirectoryView.imageDir);
+      debugPrint("📂 Checking image dir: ${imageDir.path}");
+
+      if (await imageDir.exists()) {
+        await for (final entity in imageDir.list(followLinks: false)) {
+          if (entity is File && _isImage(entity.path)) {
+            final stat = await entity.stat();
+
+            debugPrint("🖼️ Found image: ${entity.path}");
+
+            temp.add(
+              _MediaWithTime(
+                item: MediaItem(file: entity, type: MediaType.image),
+                time: stat.modified,
+              ),
+            );
+          }
         }
       }
+
+      // 🎥 VIDEOS
+      final videoDir = Directory(DirectoryView.videoDir);
+      debugPrint("📂 Checking video dir: ${videoDir.path}");
+
+      if (await videoDir.exists()) {
+        await for (final entity in videoDir.list(followLinks: false)) {
+          if (entity is File && _isVideo(entity.path)) {
+            final stat = await entity.stat();
+
+            debugPrint("🎞️ Found video: ${entity.path}");
+
+            temp.add(
+              _MediaWithTime(
+                item: MediaItem(file: entity, type: MediaType.video),
+                time: stat.modified,
+              ),
+            );
+          }
+        }
+      }
+
+      temp.sort((a, b) => b.time.compareTo(a.time));
+      _media.addAll(temp.map((e) => e.item));
+
+      debugPrint("✅ Gallery load complete, items=${_media.length}");
+    } catch (e) {
+      debugPrint('❌ Gallery load error: $e');
     }
 
-    temp.sort((a, b) => b.time.compareTo(a.time));
-    _media.addAll(temp.map((e) => e.item));
-
-    debugPrint("✅ Gallery load complete, items=${_media.length}");
-  } catch (e) {
-    debugPrint('❌ Gallery load error: $e');
+    _isLoading = false;
+    notifyListeners();
   }
-
-  _isLoading = false;
-  notifyListeners();
-}
-
 
   // ==========================================================
   // 🗑️ DELETE
@@ -138,6 +138,15 @@ class GalleryController extends ChangeNotifier {
       return _media.length - 1;
     }
     return currentIndex;
+  }
+
+  Future<bool> showDeleteConfirmation(BuildContext context) async {
+    return await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => const ConfirmDeleteDialog(),
+        ) ??
+        false;
   }
 
   // ==========================================================

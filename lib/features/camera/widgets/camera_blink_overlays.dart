@@ -41,7 +41,7 @@ class CameraFlashOverlayState extends State<CameraFlashOverlay>
         builder: (_, _) {
           return Opacity(
             opacity: _controller.value,
-            child: Container(color: AppColors.kWhiteColour),
+            child: Container(color: AppColors.kSecondaryColour),
           );
         },
       ),

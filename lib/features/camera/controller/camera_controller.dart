@@ -97,8 +97,9 @@ class CameraControllerX extends ChangeNotifier {
   // -------------------- Mode Helpers --------------------
   bool get isPhotoMode => selectedMode == CameraModes.photo.index;
   bool get isVideoMode => selectedMode == CameraModes.video.index;
-  bool get isSlowMode => selectedMode == CameraModes.slowMotion.index;
-  bool get isVideoLike => isVideoMode || isSlowMode;
+  // bool get isSlowMode => selectedMode == CameraModes.slowMotion.index;
+  bool get isVideoLike => isVideoMode;
+  //  || isSlowMode;
 
   /// Changes camera mode
   void changeMode(int index) {
