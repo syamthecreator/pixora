@@ -14,7 +14,6 @@ class ConfirmDeleteDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      // backgroundColor: AppColors.kWhiteColour.withValues(alpha: 0.18),
       title: Text(title, style: TextStyle(color: AppColors.kPrimaryColour)),
       content: Text(message),
       actions: [
@@ -27,10 +26,13 @@ class ConfirmDeleteDialog extends StatelessWidget {
         ),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.red.withValues(alpha: 0.25),
+            backgroundColor: AppColors.kRedColour.withValues(alpha: 0.25),
           ),
           onPressed: () => Navigator.pop(context, true),
-          child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          child: const Text(
+            'Delete',
+            style: TextStyle(color: AppColors.kWhiteColour),
+          ),
         ),
       ],
     );

@@ -5,6 +5,7 @@ class AppColors {
   static const kSecondaryColour = Color(0xFF0A0A0F);
   static const Color kInactiveOptionColour = Color(0xFF1A1A22);
   static const Color kWhiteColour = Color(0xFFFFFFFF);
+  static const Color kRedColour = Color(0xFFF44336);
 
   // Quick Settings Sheet
   static const Color sheetBackground = Color(0xFF0A0A0F);

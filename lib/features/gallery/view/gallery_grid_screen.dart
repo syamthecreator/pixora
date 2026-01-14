@@ -88,11 +88,8 @@ class _GalleryGridView extends StatelessWidget {
                         child: item.type == MediaType.image
                             ? Image.file(
                                 item.file,
-                                fit: BoxFit.cover,
-
-                                // 🔥 CRITICAL PERFORMANCE FIX
+                                fit: BoxFit.contain,
                                 cacheWidth: 300,
-                                cacheHeight: 300,
                               )
                             : GalleryVideoThumbnail(file: item.file),
                       ),

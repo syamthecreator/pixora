@@ -101,7 +101,7 @@ class _GalleryViewerScreenState extends State<GalleryViewerScreen> {
             ),
             DeleteFab(
               isDeleting: controller.isDeleting,
-              color: Colors.red,
+              color: AppColors.kRedColour,
               onPressed: () async {
                 final controller = context.read<GalleryController>();
 

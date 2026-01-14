@@ -8,6 +8,7 @@ class QuickSettingsSheet extends StatelessWidget {
   final VoidCallback onMoreSettings;
   final SettingsController settingsController;
   final CameraControllerX cameraControllerX;
+
   const QuickSettingsSheet({
     super.key,
     required this.onClose,
@@ -15,22 +16,20 @@ class QuickSettingsSheet extends StatelessWidget {
     required this.settingsController,
     required this.cameraControllerX,
   });
+
   @override
   Widget build(BuildContext context) {
     return Material(
       color: Colors.transparent,
       child: Container(
-        margin: const EdgeInsets.only(top: 60),
-        padding: const EdgeInsets.all(16),
         width: double.infinity,
-        height: MediaQuery.of(context).size.height * 0.35,
-        decoration: BoxDecoration(
+        padding: const EdgeInsets.all(16),
+        decoration: const BoxDecoration(
           color: AppColors.sheetBackground,
-          borderRadius: const BorderRadius.vertical(
-            bottom: Radius.circular(28),
-          ),
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _HeaderSection(onClose: onClose, onMoreSettings: onMoreSettings),

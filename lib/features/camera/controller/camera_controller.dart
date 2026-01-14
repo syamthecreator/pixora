@@ -29,8 +29,7 @@ class CameraControllerX extends ChangeNotifier {
   bool isRecording = false;
   bool isFrontCamera = false;
   bool isCameraReady = false;
-    bool gridLines = true;
-
+  bool gridLines = true;
 
   FlashModeX flashMode = FlashModeX.off;
 
@@ -192,12 +191,11 @@ class CameraControllerX extends ChangeNotifier {
     notifyListeners();
   }
 
-   /// Toggles grid overlay
+  /// Toggles grid overlay
   void toggleGridLines() {
     gridLines = !gridLines;
     notifyListeners();
   }
-
 
   // -------------------- App Lifecycle --------------------
   void restartCamera() {
@@ -357,15 +355,25 @@ class CameraControllerX extends ChangeNotifier {
         (255 * _quickSettingsBarrierOpacity).toInt(),
       ),
       transitionDuration: _quickSettingsAnimationDuration,
-      pageBuilder: (_, _, _) => Align(
-        alignment: Alignment.topCenter,
-        child: QuickSettingsSheet(
-          onClose: () => hideQuickSettings(context),
-          onMoreSettings: () => moreSettings(context),
-          settingsController: settingsController,
-          cameraControllerX: this,
-        ),
-      ),
+
+      pageBuilder: (_, _, _) {
+        return SafeArea(
+          bottom: false,
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: Material(
+              color: Colors.transparent,
+              child: QuickSettingsSheet(
+                onClose: () => hideQuickSettings(context),
+                onMoreSettings: () => moreSettings(context),
+                settingsController: settingsController,
+                cameraControllerX: this,
+              ),
+            ),
+          ),
+        );
+      },
+
       transitionBuilder: (_, animation, _, child) => SlideTransition(
         position: Tween(begin: const Offset(0, -1), end: Offset.zero).animate(
           CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
