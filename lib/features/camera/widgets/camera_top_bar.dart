@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../controller/camera_controller.dart';
@@ -55,10 +56,25 @@ class CameraTopBar extends StatelessWidget {
     return CameraOverlayWidget.glassContainer(
       child: Row(
         children: CameraModes.all.map((mode) {
-          return CameraModeButton(
-            mode: mode,
-            isActive: controller.selectedMode == mode.index,
-            onTap: () => controller.changeMode(mode.index),
+          final isActive = controller.selectedMode == mode.index;
+
+          return Opacity(
+            opacity: mode.isEnabled ? 1.0 : 0.4,
+            child: CameraModeButton(
+              mode: mode,
+              isActive: isActive,
+              onTap: () {
+                if (!mode.isEnabled) {
+                  HapticFeedback.selectionClick();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Video mode coming soon 🚀")),
+                  );
+                  return;
+                }
+
+                controller.changeMode(mode.index);
+              },
+            ),
           );
         }).toList(),
       ),

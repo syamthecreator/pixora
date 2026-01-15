@@ -4,11 +4,13 @@ class CameraMode {
   final IconData icon;
   final String label;
   final int index;
+  final bool isEnabled; // 👈 NEW
 
   const CameraMode({
     required this.icon,
     required this.label,
     required this.index,
+    this.isEnabled = true,
   });
 
   @override
@@ -28,12 +30,20 @@ class CameraMode {
 
 class CameraModes {
   static final List<CameraMode> all = [
-    CameraMode(icon: Icons.photo_camera, label: "PHOTO", index: 0),
-    CameraMode(icon: Icons.videocam, label: "VIDEO", index: 1),
-    // CameraMode(icon: Icons.slow_motion_video, label: "SLOW", index: 2),
+    CameraMode(
+      icon: Icons.photo_camera,
+      label: "PHOTO",
+      index: 0,
+      isEnabled: true,
+    ),
+    CameraMode(
+      icon: Icons.videocam,
+      label: "VIDEO",
+      index: 1,
+      isEnabled: false,
+    ),
   ];
 
   static CameraMode get photo => all[0];
   static CameraMode get video => all[1];
-  // static CameraMode get slowMotion => all[2];
 }
