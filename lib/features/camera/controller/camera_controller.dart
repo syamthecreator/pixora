@@ -122,6 +122,12 @@ class CameraControllerX extends ChangeNotifier {
     notifyListeners();
   }
 
+  void switchToRearCamera() {
+  isFrontCamera = false;
+  notifyListeners();
+}
+
+
   Future<void> toggleFlashMode() async {
     if (!isCameraReady) {
       debugPrint("Flash ignored: camera not ready");

@@ -107,6 +107,7 @@ class _RatioSection extends StatelessWidget {
           items: controller.availableRatios,
           selectedIndex: controller.getRatioIndex(),
           onItemSelected: (ratio) {
+            controller.switchToRearCamera();
             controller.updateRatio(ratio);
           },
         );
