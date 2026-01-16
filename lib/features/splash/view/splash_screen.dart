@@ -31,7 +31,7 @@ class _SplashScreenState extends State<SplashScreen>
     controller = SplashController();
     controller.init(this);
 
-    // controller.navigateFromSplashScreen(context);
+    controller.navigateFromSplashScreen(context);
   }
 
   @override
