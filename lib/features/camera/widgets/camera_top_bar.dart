@@ -67,7 +67,11 @@ class CameraTopBar extends StatelessWidget {
                 if (!mode.isEnabled) {
                   HapticFeedback.selectionClick();
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Video mode coming soon 🚀")),
+                    const SnackBar(
+                      content: Text(
+                        "Video recording is not available in this version.",
+                      ),
+                    ),
                   );
                   return;
                 }

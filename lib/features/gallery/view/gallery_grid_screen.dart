@@ -54,12 +54,10 @@ class _GalleryGridView extends StatelessWidget {
           : Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: GridView.builder(
-                // 🔥 PERFORMANCE FLAGS
                 addAutomaticKeepAlives: false,
                 addRepaintBoundaries: true,
                 addSemanticIndexes: false,
                 cacheExtent: 800,
-
                 padding: const EdgeInsets.only(bottom: 24),
                 itemCount: controller.media.length,
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -90,6 +88,7 @@ class _GalleryGridView extends StatelessWidget {
                                 item.file,
                                 fit: BoxFit.contain,
                                 cacheWidth: 300,
+                                cacheHeight: 300,
                               )
                             : GalleryVideoThumbnail(file: item.file),
                       ),

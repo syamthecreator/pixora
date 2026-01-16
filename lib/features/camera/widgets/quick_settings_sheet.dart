@@ -62,37 +62,37 @@ class _HeaderSection extends StatelessWidget {
           onPressed: onClose,
         ),
         const Spacer(),
-        _MoreSettingsButton(onMoreSettings),
+        // _MoreSettingsButton(onMoreSettings),
       ],
     );
   }
 }
 
-class _MoreSettingsButton extends StatelessWidget {
-  final VoidCallback onMoreSettings;
-  const _MoreSettingsButton(this.onMoreSettings);
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onMoreSettings,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            "More settings",
-            style: TextStyle(
-              color: AppColors.kWhiteColour,
-              fontWeight: FontWeight.w600,
-              fontSize: 14,
-            ),
-          ),
-          const SizedBox(width: 4),
-          Icon(Icons.chevron_right, color: AppColors.kWhiteColour, size: 22),
-        ],
-      ),
-    );
-  }
-}
+// class _MoreSettingsButton extends StatelessWidget {
+//   final VoidCallback onMoreSettings;
+//   const _MoreSettingsButton(this.onMoreSettings);
+//   @override
+//   Widget build(BuildContext context) {
+//     return GestureDetector(
+//       onTap: onMoreSettings,
+//       child: Row(
+//         mainAxisSize: MainAxisSize.min,
+//         children: [
+//           Text(
+//             "More settings",
+//             style: TextStyle(
+//               color: AppColors.kWhiteColour,
+//               fontWeight: FontWeight.w600,
+//               fontSize: 14,
+//             ),
+//           ),
+//           const SizedBox(width: 4),
+//           Icon(Icons.chevron_right, color: AppColors.kWhiteColour, size: 22),
+//         ],
+//       ),
+//     );
+//   }
+// }
 
 class _RatioSection extends StatelessWidget {
   final CameraControllerX controller;

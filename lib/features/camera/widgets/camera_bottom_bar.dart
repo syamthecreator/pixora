@@ -106,7 +106,6 @@ class _RecordingTimer extends StatelessWidget {
         if (!isRecording || !controller.isVideoLike) {
           return const SizedBox.shrink();
         }
-
         return Selector<CameraControllerX, String>(
           selector: (_, c) => c.formattedDuration,
           builder: (_, time, _) {
